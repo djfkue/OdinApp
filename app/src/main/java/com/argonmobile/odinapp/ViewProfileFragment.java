@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -17,6 +19,7 @@ import android.view.ViewGroup;
  */
 public class ViewProfileFragment extends Fragment {
 
+    private static final String TAG = "ViewProfileFragment";
     private OnFragmentInteractionListener mListener;
 
     public ViewProfileFragment() {
@@ -29,6 +32,13 @@ public class ViewProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_view_profile, container, false);
+        rootView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.e(TAG, "onTouch.......");
+                return false;
+            }
+        });
         return rootView;
     }
 
