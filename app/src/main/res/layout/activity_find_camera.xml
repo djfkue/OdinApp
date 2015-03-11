@@ -7,7 +7,7 @@
     tools:context="com.argonmobile.odinapp.FindCameraActivity"
     android:background="@color/material_deep_teal_500">
 
-    <android.support.v4.view.ViewPager
+    <com.argonmobile.odinapp.view.ViewPagerFixed
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

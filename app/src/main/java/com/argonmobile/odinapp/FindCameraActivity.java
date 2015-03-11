@@ -54,7 +54,8 @@ public class FindCameraActivity extends ActionBarActivity {
                 if (mScaleFactor < 1.0f) {
                     Intent intent = new Intent(FindCameraActivity.this, ChosenProfileActivity.class);
                     startActivity(intent);
-                    finishAfterTransition();
+                    //finishAfterTransition();
+                    finish();
                 }
             }
         });
@@ -70,7 +71,7 @@ public class FindCameraActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_find_camera, menu);
+        //getMenuInflater().inflate(R.menu.menu_find_camera, menu);
         return true;
     }
 
