@@ -1,9 +1,11 @@
 package com.argonmobile.odinapp;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,17 +13,52 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import com.argonmobile.odinapp.view.ScaleTransformView;
+
 
 public class ChosenProfileActivity extends ActionBarActivity implements ViewProfileFragment.OnFragmentInteractionListener{
 
+    private final static String TAG = "ChosenProfileActivity";
+
+    private ScaleTransformView mScaleTransformView;
+
+    private float mScaleFactor = Float.NaN;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_chosen_profile);
+
+        mScaleTransformView = (ScaleTransformView)findViewById(R.id.gesture_view);
+        mScaleTransformView.setOnScaleListener(new ScaleTransformView.OnScaleListener() {
+
+
+            @Override
+            public void onScaleBegin() {
+                mScaleFactor = 1.0f;
+            }
+
+            @Override
+            public void onScale(float scaleFactor) {
+                mScaleFactor *= scaleFactor;
+            }
+
+            @Override
+            public void onScaleEnd() {
+                Log.e(TAG, "onScaleEnd....");
+                if (mScaleFactor > 1.1f) {
+                    Intent intent = new Intent(ChosenProfileActivity.this, FindCameraActivity.class);
+                    startActivity(intent);
+                    finishAfterTransition();
+                }
+            }
+        });
+
         if (savedInstanceState == null) {
             //ProfileFragment profileFragment = ProfileFragment.newInstance("test", "test2");
             getSupportFragmentManager().beginTransaction()

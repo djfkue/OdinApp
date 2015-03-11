@@ -14,11 +14,17 @@
         <activity
             android:name=".ChosenProfileActivity"
             android:label="@string/title_activity_chosen_profile"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".FindCameraActivity"
+            android:label="@string/title_activity_find_camera"
+            android:screenOrientation="landscape">
         </activity>
     </application>
 
