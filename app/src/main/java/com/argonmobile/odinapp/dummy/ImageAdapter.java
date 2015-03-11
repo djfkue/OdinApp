@@ -1,6 +1,7 @@
 package com.argonmobile.odinapp.dummy;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -33,9 +34,10 @@ public class ImageAdapter extends BaseAdapter {
         ImageView imageView;
         if (convertView == null) {  // if it's not recycled, initialize some attributes
             imageView = new ImageView(mContext);
-            imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
+            final float scale = mContext.getResources().getDisplayMetrics().density;
+            imageView.setLayoutParams(new GridView.LayoutParams((int)(220 * scale), (int)(135 * scale)));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setPadding(8, 8, 8, 8);
+            imageView.setBackgroundColor(Color.BLUE);
         } else {
             imageView = (ImageView) convertView;
         }
@@ -52,10 +54,10 @@ public class ImageAdapter extends BaseAdapter {
             R.drawable.sample_0, R.drawable.sample_1,
             R.drawable.sample_2, R.drawable.sample_3,
             R.drawable.sample_4, R.drawable.sample_5,
-            R.drawable.sample_6, R.drawable.sample_7,
-            R.drawable.sample_0, R.drawable.sample_1,
-            R.drawable.sample_2, R.drawable.sample_3,
-            R.drawable.sample_4, R.drawable.sample_5,
-            R.drawable.sample_6, R.drawable.sample_7
+//            R.drawable.sample_6, R.drawable.sample_7,
+//            R.drawable.sample_0, R.drawable.sample_1,
+//            R.drawable.sample_2, R.drawable.sample_3,
+//            R.drawable.sample_4, R.drawable.sample_5,
+//            R.drawable.sample_6, R.drawable.sample_7
     };
 }

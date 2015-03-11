@@ -19,11 +19,18 @@ public class FindCameraPageAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int i) {
-        Fragment fragment = new DemoObjectFragment();
-        Bundle args = new Bundle();
-        // Our object is just an integer :-P
-        args.putInt(DemoObjectFragment.ARG_OBJECT, i + 1);
-        fragment.setArguments(args);
+
+        Fragment fragment = null;
+        if (i == 0) {
+            fragment = new SearchCameraFragment();
+        }
+
+        if (i == 1) {
+            fragment = new FindCameraGridFragment();
+        }
+        if (i == 2) {
+            fragment = new RecentCameraGridFragment();
+        }
         return fragment;
     }
 
