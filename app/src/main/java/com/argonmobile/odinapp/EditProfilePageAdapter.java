@@ -13,11 +13,11 @@ import android.widget.TextView;
 /**
  * Created by argon on 3/11/15.
  */
-public class FindCameraPageAdapter extends FragmentStatePagerAdapter {
+public class EditProfilePageAdapter extends FragmentStatePagerAdapter {
 
     SparseArray<Fragment> mRegisteredFragments = new SparseArray<Fragment>();
 
-    public FindCameraPageAdapter(FragmentManager fm) {
+    public EditProfilePageAdapter(FragmentManager fm) {
         super(fm);
     }
 
@@ -26,14 +26,14 @@ public class FindCameraPageAdapter extends FragmentStatePagerAdapter {
 
         Fragment fragment = null;
         if (i == 0) {
-            fragment = new SearchCameraFragment();
+            fragment = new DemoObjectFragment();
         }
 
         if (i == 1) {
-            fragment = new FindCameraGridFragment();
+            fragment = new EditProfileFragment();
         }
         if (i == 2) {
-            fragment = new RecentCameraGridFragment();
+            fragment = new DemoObjectFragment();
         }
         return fragment;
     }
@@ -71,10 +71,11 @@ public class FindCameraPageAdapter extends FragmentStatePagerAdapter {
             // The last two arguments ensure LayoutParams are inflated
             // properly.
             View rootView = inflater.inflate(
-                    R.layout.fragment_item_grid, container, false);
-            Bundle args = getArguments();
-            ((TextView) rootView.findViewById(R.id.text_view)).setText(
-                    Integer.toString(args.getInt(ARG_OBJECT)));
+                    R.layout.fragment_search_camera, container, false);
+//            Bundle args = getArguments();
+//            ((TextView) rootView.findViewById(R.id.text_view)).setText(
+//                    Integer.toString(args.getInt(ARG_OBJECT)));
+            rootView.setBackgroundResource(R.color.primary_dark_material_dark);
             return rootView;
         }
     }

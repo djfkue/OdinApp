@@ -1,27 +1,27 @@
 package com.argonmobile.odinapp.dummy;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.argonmobile.odinapp.R;
+import com.argonmobile.odinapp.model.CameraInfo;
+import com.argonmobile.odinapp.model.EditProfileModel;
 import com.argonmobile.odinapp.view.CheckedFrameLayout;
 
-public class ImageAdapter extends BaseAdapter {
+public class EditProfileCameraAdapter extends BaseAdapter {
     private final LayoutInflater mInflater;
     private Context mContext;
 
     private SparseBooleanArray mCheckStates;
     private int mCheckedItemCount;
 
-    public ImageAdapter(Context c) {
+    public EditProfileCameraAdapter(Context c) {
         mContext = c;
         mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mCheckedItemCount = 0;
@@ -60,7 +60,7 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     public int getCount() {
-        return mThumbIds.length;
+        return EditProfileModel.getInstance().getCameraInfoArrayList().size();
     }
 
     public Object getItem(int position) {
@@ -73,6 +73,9 @@ public class ImageAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
+
+        CameraInfo cameraInfo = EditProfileModel.getInstance().getCameraInfoArrayList().get(position);
+
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.camera_grid_item, parent, false);
         }
@@ -84,22 +87,7 @@ public class ImageAdapter extends BaseAdapter {
 
         ImageView imageView = (ImageView) convertView.findViewById(R.id.camera_view);
 
-        imageView.setImageResource(mThumbIds[position]);
+        imageView.setImageResource(cameraInfo.getBitmap());
         return convertView;
     }
-
-    // references to our images
-    public Integer[] mThumbIds = {
-            R.drawable.sample_2, R.drawable.sample_3,
-            R.drawable.sample_4, R.drawable.sample_5,
-            R.drawable.sample_6, R.drawable.sample_7,
-            R.drawable.sample_0, R.drawable.sample_1,
-            R.drawable.sample_2, R.drawable.sample_3,
-            R.drawable.sample_4, R.drawable.sample_5,
-            R.drawable.sample_6, R.drawable.sample_7,
-            R.drawable.sample_0, R.drawable.sample_1,
-            R.drawable.sample_2, R.drawable.sample_3,
-            R.drawable.sample_4, R.drawable.sample_5,
-//            R.drawable.sample_6, R.drawable.sample_7
-    };
 }

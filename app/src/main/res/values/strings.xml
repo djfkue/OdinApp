@@ -7,8 +7,11 @@
     <string name="title_activity_chosen_profile">ChosenProfileActivity</string>
     <string name="view_profile_title">Baijiahu XiaoQu Profile</string>
     <string name="title_activity_find_camera">FindCameraActivity</string>
+    <string name="edit_profile_title">Default Profile Name</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="title_activity_temp_chosen_profile">TempChosenProfileActivity</string>
 
 </resources>

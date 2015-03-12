@@ -9,34 +9,29 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
-import com.argonmobile.odinapp.model.EditProfileModel;
 import com.argonmobile.odinapp.view.ScaleTransformView;
 
 
-public class FindCameraActivity extends ActionBarActivity {
+public class EditProfileActivity extends ActionBarActivity {
 
-    private static final String TAG = "FindCameraActivity";
-    public static final String CAMERA_INFO_LIST = "CAMERA_INFO_LIST";
+    private static final String TAG = "EditProfileActivity";
 
     private ScaleTransformView mScaleTransformView;
     private float mScaleFactor = Float.NaN;
 
     private ViewPager mViewPager;
-    private FindCameraPageAdapter mFindCameraPageAdapter;
-
+    private EditProfilePageAdapter mEditProfilePageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        overridePendingTransition(0, 0);
+
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-
-        setContentView(R.layout.activity_find_camera);
-
-        EditProfileModel.getInstance().clearCameraInfoArrayList();
+        setContentView(R.layout.activity_edit_profile);
 
         mScaleTransformView = (ScaleTransformView)findViewById(R.id.gesture_view);
         mScaleTransformView.setOnScaleListener(new ScaleTransformView.OnScaleListener() {
@@ -55,33 +50,31 @@ public class FindCameraActivity extends ActionBarActivity {
             @Override
             public void onScaleEnd() {
                 Log.e(TAG, "onScaleEnd....");
-                if (mScaleFactor < 0.9f) {
-                    Intent intent = new Intent(FindCameraActivity.this, EditProfileActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelableArrayList(CAMERA_INFO_LIST, EditProfileModel.getInstance().getCameraInfoArrayList());
-//                    intent.putExtra(CAMERA_INFO_LIST,bundle);
-                    intent.putExtras(bundle);
+                if (mScaleFactor < 1.0f && mScaleFactor > 0.7f) {
+                    Intent intent = new Intent(EditProfileActivity.this, TempChosenProfileActivity.class);
+                    intent.putExtra(TempChosenProfileActivity.MODE_ENABLE_SELECT, true);
                     startActivity(intent);
-
-                    // Override transitions: we don't want the normal window animation in addition
-                    // to our custom one
-                    overridePendingTransition(0, 0);
+                } else if (mScaleFactor > 1.1f){
+                    Intent intent = new Intent(EditProfileActivity.this, FindCameraActivity.class);
+                    startActivity(intent);
+                } else if (mScaleFactor < 0.7f) {
+                    Intent intent = new Intent(EditProfileActivity.this, TempChosenProfileActivity.class);
+                    intent.putExtra(TempChosenProfileActivity.MODE_ENABLE_SELECT, false);
+                    startActivity(intent);
                 }
             }
         });
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
-        mFindCameraPageAdapter = new FindCameraPageAdapter(getSupportFragmentManager());
-        mViewPager.setAdapter(mFindCameraPageAdapter);
+        mEditProfilePageAdapter = new EditProfilePageAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mEditProfilePageAdapter);
         mViewPager.setCurrentItem(1);
-
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_find_camera, menu);
+        getMenuInflater().inflate(R.menu.menu_edit_profile, menu);
         return true;
     }
 
@@ -99,5 +92,4 @@ public class FindCameraActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
 }

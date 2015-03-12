@@ -20,6 +20,10 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
 
     private final static String TAG = "ChosenProfileActivity";
 
+    public static final String ENABLE_ANIMATION = "enable_animation";
+    public static final String PROFILE_NAME = "profile_name";
+    public static final String PACKAGE_NAME = "com.argonmobile.odinapp";
+
     private ScaleTransformView mScaleTransformView;
 
     private float mScaleFactor = Float.NaN;
@@ -28,7 +32,7 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
+        overridePendingTransition(0, 0);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -54,15 +58,25 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
                 if (mScaleFactor > 1.1f) {
                     Intent intent = new Intent(ChosenProfileActivity.this, FindCameraActivity.class);
                     startActivity(intent);
-                    finishAfterTransition();
                 }
             }
         });
 
         if (savedInstanceState == null) {
+            Fragment fragment = new ViewProfileFragment();
+            if (getIntent().getBooleanExtra(ENABLE_ANIMATION, false)) {
+
+                Bundle bundle = getIntent().getExtras();
+                final int top = bundle.getInt(PACKAGE_NAME + ".top");
+                final int left = bundle.getInt(PACKAGE_NAME + ".left");
+                final int width = bundle.getInt(PACKAGE_NAME + ".width");
+                final int height = bundle.getInt(PACKAGE_NAME + ".height");
+
+                fragment.setArguments(bundle);
+            }
             //ProfileFragment profileFragment = ProfileFragment.newInstance("test", "test2");
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ViewProfileFragment())
+                    .add(R.id.container, fragment)
                     .commit();
         }
     }
