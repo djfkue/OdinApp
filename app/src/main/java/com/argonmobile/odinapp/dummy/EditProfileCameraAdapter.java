@@ -1,8 +1,11 @@
 package com.argonmobile.odinapp.dummy;
 
 import android.content.Context;
+import android.support.v4.view.MotionEventCompat;
 import android.util.SparseBooleanArray;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -88,6 +91,7 @@ public class EditProfileCameraAdapter extends BaseAdapter {
         ImageView imageView = (ImageView) convertView.findViewById(R.id.camera_view);
 
         imageView.setImageResource(cameraInfo.getBitmap());
+
         return convertView;
     }
 }
