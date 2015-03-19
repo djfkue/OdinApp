@@ -27,6 +27,7 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
     private ScaleTransformView mScaleTransformView;
 
     private float mScaleFactor = Float.NaN;
+    private ViewProfileFragment mViewProfileFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,12 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
             @Override
             public void onScale(float scaleFactor) {
                 mScaleFactor *= scaleFactor;
+                if (mScaleFactor < 1) {
+                    mViewProfileFragment.getView().setPivotX(mScaleTransformView.getWidth() / 2);
+                    mViewProfileFragment.getView().setPivotY(mScaleTransformView.getHeight() / 2);
+                    mViewProfileFragment.getView().setScaleY(mScaleFactor);
+                    mViewProfileFragment.getView().setScaleX(mScaleFactor);
+                }
             }
 
             @Override
@@ -58,12 +65,19 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
                 if (mScaleFactor < 0.7f) {
                     Intent intent = new Intent(ChosenProfileActivity.this, FindCameraActivity.class);
                     startActivity(intent);
+                } else if (mScaleFactor < 1) {
+                    mViewProfileFragment.getView().animate().scaleX(1).scaleY(1).withLayer();
+                } else if (mScaleFactor > 1.1f) {
+                    mViewProfileFragment.performUpdateProfileModel();
+                    Intent intent = new Intent(ChosenProfileActivity.this, EditProfileActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.fadein, R.anim.fadeout);
                 }
             }
         });
 
         if (savedInstanceState == null) {
-            Fragment fragment = new ViewProfileFragment();
+            mViewProfileFragment = new ViewProfileFragment();
             if (getIntent().getBooleanExtra(ENABLE_ANIMATION, false)) {
 
                 Bundle bundle = getIntent().getExtras();
@@ -72,11 +86,11 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
                 final int width = bundle.getInt(PACKAGE_NAME + ".width");
                 final int height = bundle.getInt(PACKAGE_NAME + ".height");
 
-                fragment.setArguments(bundle);
+                mViewProfileFragment.setArguments(bundle);
             }
             //ProfileFragment profileFragment = ProfileFragment.newInstance("test", "test2");
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment)
+                    .add(R.id.container, mViewProfileFragment)
                     .commit();
         }
     }
@@ -110,7 +124,7 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
     }
 
     /**
-     * A placeholder fragment containing a simple view.
+     * A placeholder mViewProfileFragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
 

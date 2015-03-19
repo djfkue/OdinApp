@@ -1,4 +1,4 @@
-package com.argonmobile.odinapp;
+package com.argonmobile.odinapp.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -15,7 +15,7 @@ import android.widget.RelativeLayout;
 /**
  * TODO: document your custom view class.
  */
-public class EditProfileLayoutView extends RelativeLayout {
+public class FreeProfileLayoutView extends RelativeLayout {
     private String mExampleString; // TODO: use a default from R.string...
     private int mExampleColor = Color.RED; // TODO: use a default from R.color...
     private float mExampleDimension = 0; // TODO: use a default from R.dimen...
@@ -25,15 +25,15 @@ public class EditProfileLayoutView extends RelativeLayout {
     private float mTextWidth;
     private float mTextHeight;
 
-    public EditProfileLayoutView(Context context) {
+    public FreeProfileLayoutView(Context context) {
         super(context);
     }
 
-    public EditProfileLayoutView(Context context, AttributeSet attrs) {
+    public FreeProfileLayoutView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public EditProfileLayoutView(Context context, AttributeSet attrs, int defStyle) {
+    public FreeProfileLayoutView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 

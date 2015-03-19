@@ -21,7 +21,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:layout_margin="30dp"
-                android:text="Profile 1"
+                android:contentDescription="@string/view_profile_title"
                 android:gravity="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display3"
                 android:background="@android:color/holo_blue_light"/>
@@ -31,7 +31,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:layout_margin="30dp"
-                android:text="Profile 2"
+                android:contentDescription="[C] 预案 1"
                 android:gravity="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display3"
                 android:background="@android:color/holo_blue_light"/>
@@ -48,7 +48,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:layout_margin="30dp"
-                android:text="Profile 3"
+                android:contentDescription="[C] 预案 2"
                 android:gravity="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
                 android:background="@android:color/holo_blue_light"/>
@@ -58,7 +58,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:layout_margin="30dp"
-                android:text="Profile 4"
+                android:contentDescription="[C] 预案 3"
                 android:gravity="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
                 android:background="@android:color/holo_blue_light"/>
@@ -68,7 +68,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:layout_margin="30dp"
-                android:text="Profile 5"
+                android:contentDescription="[C] 预案 4"
                 android:gravity="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
                 android:background="@android:color/holo_blue_light"/>

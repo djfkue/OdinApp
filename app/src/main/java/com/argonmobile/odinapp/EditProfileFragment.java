@@ -4,19 +4,13 @@ package com.argonmobile.odinapp;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
-import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -24,12 +18,14 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.argonmobile.odinapp.dummy.EditProfileCameraAdapter;
 import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
+import com.argonmobile.odinapp.view.FreeProfileLayoutView;
 import com.argonmobile.odinapp.view.ShadowLayout;
 
 import java.util.ArrayList;
@@ -51,7 +47,7 @@ public class EditProfileFragment extends Fragment {
     private GridView mGridView;
     private ColorDrawable mBackground;
     private TextView mTextView;
-    private EditProfileLayoutView mEditProfileLayoutView;
+    private FreeProfileLayoutView mEditProfileLayoutView;
 
     public EditProfileFragment() {
         // Required empty public constructor
@@ -64,7 +60,7 @@ public class EditProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
-        mEditProfileLayoutView = (EditProfileLayoutView) rootView.findViewById(R.id.edit_container);
+        mEditProfileLayoutView = (FreeProfileLayoutView) rootView.findViewById(R.id.edit_container);
 
         mGridView = (GridView) rootView.findViewById(R.id.grid_view);
         mEditProfileCameraAdapter = new EditProfileCameraAdapter(rootView.getContext());
@@ -157,11 +153,12 @@ public class EditProfileFragment extends Fragment {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mTextView.setTranslationY(mTextView.getHeight());
-                mTextView.animate().setDuration(duration/2).
+                mTextView.animate().setDuration(duration).
                         translationY(0).alpha(1).
                         setInterpolator(sDecelerator).withEndAction(new Runnable() {
                     @Override
                     public void run() {
+                        performUpdateProfileModel();
                         createEditProfileLayout();
                     }
                 });
@@ -182,15 +179,30 @@ public class EditProfileFragment extends Fragment {
 
     }
 
-    private void createEditProfileLayout() {
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    public void performUpdateProfileModel() {
+        Log.e(TAG, "performUpdateProfileModel");
+        ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
         for (int i = 0; i < mGridView.getChildCount(); i++) {
-            View cameraView = mGridView.getChildAt(i);
+            View view = mGridView.getChildAt(i);
+            CameraInfo cameraInfo = cameraInfos.get(i);
+            cameraInfo.mLeft = view.getLeft();
+            cameraInfo.mTop = view.getTop();
+        }
+    }
+
+    private void createEditProfileLayout() {
+        ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        for (int i = 0; i < cameraInfos.size(); i++) {
+            //View cameraView = mGridView.getChildAt(i);
+            CameraInfo cameraInfo = cameraInfos.get(i);
             View child = inflater.inflate(R.layout.camera_grid_item, mEditProfileLayoutView, false);
 
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(cameraView.getMeasuredWidth(), cameraView.getMeasuredHeight());
-            layoutParams.leftMargin = cameraView.getLeft();
-            layoutParams.topMargin = cameraView.getTop();
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(cameraInfo.getWidth(), cameraInfo.getHeight());
+            layoutParams.leftMargin = cameraInfo.getLeft();
+            layoutParams.topMargin = cameraInfo.getTop();
+            ImageView imageView = (ImageView)child.findViewById(R.id.camera_view);
+            imageView.setImageResource(cameraInfo.getBitmap());
             mEditProfileLayoutView.addView(child, layoutParams);
             mGridView.setVisibility(View.GONE);
         }

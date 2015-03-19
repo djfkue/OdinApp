@@ -8,13 +8,13 @@ import android.os.Parcelable;
  */
 public class CameraInfo implements Parcelable {
 
-    private int mTop;
-    private int mLeft;
-    private int mWidth;
-    private int mHeight;
+    public int mTop;
+    public int mLeft;
+    public int mWidth;
+    public int mHeight;
 
-    private int mId;
-    private int mBitmap;
+    public int mId;
+    public int mBitmap;
 
     public CameraInfo(int top, int left, int width, int height, int id, int bitmap) {
         mTop = top;

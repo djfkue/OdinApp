@@ -5,9 +5,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_chosen_profile">ChosenProfileActivity</string>
-    <string name="view_profile_title">Baijiahu XiaoQu Profile</string>
-    <string name="title_activity_find_camera">FindCameraActivity</string>
-    <string name="edit_profile_title">Default Profile Name</string>
+    <string name="view_profile_title">[C] 默认预案 2015</string>
+    <string name="title_activity_find_camera">[A] 选择摄像头</string>
+    <string name="edit_profile_title">[B] 默认预案 2015</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

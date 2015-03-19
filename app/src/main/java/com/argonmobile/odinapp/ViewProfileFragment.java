@@ -1,8 +1,8 @@
 package com.argonmobile.odinapp;
 
-import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -10,16 +10,21 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.ArrayAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.argonmobile.odinapp.dummy.DummyContent;
+import com.argonmobile.odinapp.dummy.ChosenProfileImageAdapter;
+import com.argonmobile.odinapp.model.CameraInfo;
+import com.argonmobile.odinapp.model.EditProfileModel;
+
+import java.util.ArrayList;
 
 
 /**
@@ -33,6 +38,7 @@ public class ViewProfileFragment extends Fragment {
     private static final String TAG = "ViewProfileFragment";
     private static final String ENABLE_ANIMATION = "enable_animation";
     private static final String PROFILE_NAME = "profile_name";
+    private static final String PROFILE_ID = "profile_id";
     private static final String PACKAGE_NAME = "com.argonmobile.odinapp";
 
     private static final int ANIM_DURATION = 380;
@@ -44,8 +50,16 @@ public class ViewProfileFragment extends Fragment {
 
     private ColorDrawable mBackground;
     private boolean mEnableAnimation = false;
-    private TextView mTextView;
     private String mProfileName;
+
+    private ChosenProfileImageAdapter mImageAdapter;
+    private GridView gridview;
+    private TextView mTextView;
+    private View mRootView;
+
+    private int mProfileId;
+
+    private RelativeLayout mEditProfileLayoutView;
 
     public ViewProfileFragment() {
         // Required empty public constructor
@@ -57,7 +71,7 @@ public class ViewProfileFragment extends Fragment {
 
         if (getArguments() != null) {
             mEnableAnimation = getArguments().getBoolean(ENABLE_ANIMATION, false);
-
+            mProfileId = getArguments().getInt(PROFILE_ID, 0);
         }
     }
 
@@ -65,25 +79,38 @@ public class ViewProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        final View rootView = inflater.inflate(R.layout.fragment_view_profile, container, false);
-        rootView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.e(TAG, "onTouch.......");
-                return false;
-            }
-        });
-        mBackground = new ColorDrawable(Color.BLACK);
-        rootView.setBackground(mBackground);
+        mRootView = null;
+        if (!mEnableAnimation) {
+            mRootView = inflater.inflate(R.layout.fragment_view_profile_default, container, false);
 
-        mTextView = (TextView) rootView.findViewById(R.id.profile_name);
+            gridview = (GridView) mRootView.findViewById(R.id.grid_view);
+
+            mImageAdapter = new ChosenProfileImageAdapter(mRootView.getContext());
+            gridview.setAdapter(mImageAdapter);
+        } else {
+            mRootView = inflater.inflate(R.layout.fragment_view_profile, container, false);
+            mEditProfileLayoutView = (RelativeLayout) mRootView.findViewById(R.id.camera_container);
+            if (mProfileId == 0) {
+                createProfileLayout();
+            }
+        }
+
+        mTextView = (TextView) mRootView.findViewById(R.id.title_view);
+
+        mBackground = new ColorDrawable(Color.BLACK);
+        mRootView.setBackground(mBackground);
+
+        if (mProfileId != 0 && mEnableAnimation) {
+            mTextView.setVisibility(View.GONE);
+            mRootView.setBackgroundResource(mProfileId);
+        }
 
         if (savedInstanceState == null) {
             if (mEnableAnimation) {
-                rootView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                mRootView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                     @Override
                     public boolean onPreDraw() {
-                        rootView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        mRootView.getViewTreeObserver().removeOnPreDrawListener(this);
                         runEnterAnimation();
                         return true;
                     }
@@ -91,7 +118,24 @@ public class ViewProfileFragment extends Fragment {
             }
         }
 
-        return rootView;
+        return mRootView;
+    }
+
+    private void createProfileLayout() {
+        ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        for (int i = 0; i < cameraInfos.size(); i++) {
+            //View cameraView = mGridView.getChildAt(i);
+            CameraInfo cameraInfo = cameraInfos.get(i);
+            View child = inflater.inflate(R.layout.camera_grid_item, mEditProfileLayoutView, false);
+
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(cameraInfo.getWidth(), cameraInfo.getHeight());
+            layoutParams.leftMargin = cameraInfo.getLeft();
+            layoutParams.topMargin = cameraInfo.getTop();
+            ImageView imageView = (ImageView)child.findViewById(R.id.camera_view);
+            imageView.setImageResource(cameraInfo.getBitmap());
+            mEditProfileLayoutView.addView(child, layoutParams);
+        }
     }
 
     private void runEnterAnimation() {
@@ -109,27 +153,39 @@ public class ViewProfileFragment extends Fragment {
             // Figure out where the thumbnail and full size versions are, relative
             // to the screen and each other
             int[] screenLocation = new int[2];
-            mTextView.getLocationOnScreen(screenLocation);
+            getView().getLocationOnScreen(screenLocation);
             int leftDelta = left - screenLocation[0];
             int topDelta = top - screenLocation[1];
 
             // Scale factors to make the large version the same size as the thumbnail
-            float widthScale = (float) width / mTextView.getWidth();
-            float heightScale = (float) height / mTextView.getHeight();
+            float widthScale = (float) width / getView().getWidth();
+            float heightScale = (float) height / getView().getHeight();
 
-            mTextView.setPivotX(0);
-            mTextView.setPivotY(0);
-            mTextView.setScaleX(widthScale);
-            mTextView.setScaleY(heightScale);
-            mTextView.setTranslationX(leftDelta);
-            mTextView.setTranslationY(topDelta);
+            getView().setPivotX(0);
+            getView().setPivotY(0);
+            getView().setScaleX(widthScale);
+            getView().setScaleY(heightScale);
+            getView().setTranslationX(leftDelta);
+            getView().setTranslationY(topDelta);
 
             // Animate scale and translation to go from thumbnail to full size
-            mTextView.animate().setDuration(duration).
+            getView().animate().setDuration(duration).
                     scaleX(1).scaleY(1).
                     translationX(0).translationY(0).
-                    setInterpolator(sDecelerator);
+                    setInterpolator(sDecelerator).withLayer();
 
+        }
+    }
+
+    public void performUpdateProfileModel() {
+        if (!mEnableAnimation) {
+            for (int i = 0; i < gridview.getChildCount(); i++) {
+                View view = gridview.getChildAt(i);
+                int[] screenLocation = new int[2];
+                view.getLocationOnScreen(screenLocation);
+                CameraInfo cameraInfo = new CameraInfo(view.getTop(), view.getLeft(), view.getWidth(), view.getHeight(), i, mImageAdapter.mThumbIds[i]);
+                EditProfileModel.getInstance().addCameraInfo(cameraInfo);
+            }
         }
     }
 

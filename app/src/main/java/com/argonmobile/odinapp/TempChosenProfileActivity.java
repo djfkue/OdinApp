@@ -3,7 +3,9 @@ package com.argonmobile.odinapp;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -26,13 +28,14 @@ public class TempChosenProfileActivity extends ActionBarActivity {
 
     public static final String MODE_ENABLE_SELECT = "mode_enable_select";
 
-    private static final int ANIM_DURATION = 500;
+    private static final int ANIM_DURATION = 800;
 
     private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
     private static final TimeInterpolator sAccelerator = new AccelerateInterpolator();
 
     private static final String ENABLE_ANIMATION = "enable_animation";
     private static final String PROFILE_NAME = "profile_name";
+    private static final String PROFILE_ID = "profile_id";
     private static final String PACKAGE_NAME = "com.argonmobile.odinapp";
 
     private ScaleTransformView mScaleTransformView;
@@ -45,6 +48,8 @@ public class TempChosenProfileActivity extends ActionBarActivity {
     private TextView mProfileFour;
     private TextView mProfileFive;
 
+    private boolean mIsAnimating;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +61,7 @@ public class TempChosenProfileActivity extends ActionBarActivity {
 
         mEnableSelect = getIntent().getBooleanExtra(MODE_ENABLE_SELECT, true);
 
+        String bitmap = getIntent().getStringExtra("TEST_BITMAP");
         mProfileOne = (TextView) findViewById(R.id.profile_1);
         mProfileOne.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,6 +69,8 @@ public class TempChosenProfileActivity extends ActionBarActivity {
                 startChosenProfileActivity(mProfileOne);
             }
         });
+        mProfileOne.setBackground(new BitmapDrawable(getResources(), bitmap));
+        mProfileOne.setTag(0);
 
         mProfileTwo = (TextView) findViewById(R.id.profile_2);
         mProfileTwo.setOnClickListener(new View.OnClickListener() {
@@ -72,6 +80,9 @@ public class TempChosenProfileActivity extends ActionBarActivity {
             }
         });
 
+        mProfileTwo.setBackgroundResource(R.drawable.profile_1);
+        mProfileTwo.setTag(R.drawable.profile_1);
+
         mProfileThree = (TextView) findViewById(R.id.profile_3);
         mProfileThree.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,6 +90,8 @@ public class TempChosenProfileActivity extends ActionBarActivity {
                 startChosenProfileActivity(mProfileThree);
             }
         });
+        mProfileThree.setBackgroundResource(R.drawable.profile_2);
+        mProfileThree.setTag(R.drawable.profile_2);
 
         mProfileFour = (TextView) findViewById(R.id.profile_4);
         mProfileFour.setOnClickListener(new View.OnClickListener() {
@@ -87,6 +100,8 @@ public class TempChosenProfileActivity extends ActionBarActivity {
                 startChosenProfileActivity(mProfileFour);
             }
         });
+        mProfileFour.setBackgroundResource(R.drawable.profile_3);
+        mProfileFour.setTag(R.drawable.profile_3);
 
         mProfileFive = (TextView) findViewById(R.id.profile_5);
         mProfileFive.setOnClickListener(new View.OnClickListener() {
@@ -95,6 +110,8 @@ public class TempChosenProfileActivity extends ActionBarActivity {
                 startChosenProfileActivity(mProfileFive);
             }
         });
+        mProfileFive.setBackgroundResource(R.drawable.profile_4);
+        mProfileFive.setTag(R.drawable.profile_4);
 
         mScaleTransformView = (ScaleTransformView)findViewById(R.id.gesture_view);
         mScaleTransformView.setOnScaleListener(new ScaleTransformView.OnScaleListener() {
@@ -133,11 +150,13 @@ public class TempChosenProfileActivity extends ActionBarActivity {
             }
         });
 
-        mBackground = new ColorDrawable(Color.BLACK);
+        mBackground = new ColorDrawable(Color.GRAY);
         mScaleTransformView.setBackground(mBackground);
     }
 
     private void runEnterAnimation() {
+
+        mIsAnimating = true;
 
         final long duration = (long) (ANIM_DURATION);
 
@@ -193,23 +212,35 @@ public class TempChosenProfileActivity extends ActionBarActivity {
         mProfileFive.setTranslationY(deltaTop);
         mProfileFive.animate().setDuration(duration).
                 translationX(0).translationY(0).
-                setInterpolator(sDecelerator).withLayer();
+                setInterpolator(sDecelerator).withLayer().withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                mIsAnimating = false;
+            }
+        });
 
+        ObjectAnimator bgAnim = ObjectAnimator.ofInt(mBackground, "alpha", 0, 255);
+        bgAnim.setDuration(duration * 2);
+        bgAnim.start();
     }
 
     private void startChosenProfileActivity(TextView view) {
-        Intent intent = new Intent(TempChosenProfileActivity.this, ChosenProfileActivity.class);
+        if (mIsAnimating) {
+            return;
+        }
 
         int[] screenLocation = new int[2];
         view.getLocationOnScreen(screenLocation);
 
+        Intent intent = new Intent(TempChosenProfileActivity.this, ChosenProfileActivity.class);
         intent.
                 putExtra(PACKAGE_NAME + ".left", screenLocation[0]).
                 putExtra(PACKAGE_NAME + ".top", screenLocation[1]).
                 putExtra(PACKAGE_NAME + ".width", view.getWidth()).
                 putExtra(PACKAGE_NAME + ".height", view.getHeight()).
                 putExtra(ENABLE_ANIMATION, true).
-                putExtra(PROFILE_NAME, view.getText());
+                putExtra(PROFILE_NAME, view.getContentDescription()).
+                putExtra(PROFILE_ID, (int)view.getTag());
         startActivity(intent);
         overridePendingTransition(0, 0);
     }

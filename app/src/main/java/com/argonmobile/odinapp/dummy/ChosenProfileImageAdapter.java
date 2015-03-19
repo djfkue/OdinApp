@@ -9,18 +9,16 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.argonmobile.odinapp.R;
-import com.argonmobile.odinapp.model.CameraInfo;
-import com.argonmobile.odinapp.model.EditProfileModel;
 import com.argonmobile.odinapp.view.CheckedFrameLayout;
 
-public class ChoesnProfileCameraAdapter extends BaseAdapter {
+public class ChosenProfileImageAdapter extends BaseAdapter {
     private final LayoutInflater mInflater;
     private Context mContext;
 
     private SparseBooleanArray mCheckStates;
     private int mCheckedItemCount;
 
-    public ChoesnProfileCameraAdapter(Context c) {
+    public ChosenProfileImageAdapter(Context c) {
         mContext = c;
         mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mCheckedItemCount = 0;
@@ -59,7 +57,7 @@ public class ChoesnProfileCameraAdapter extends BaseAdapter {
     }
 
     public int getCount() {
-        return EditProfileModel.getInstance().getCameraInfoArrayList().size();
+        return mThumbIds.length;
     }
 
     public Object getItem(int position) {
@@ -72,9 +70,6 @@ public class ChoesnProfileCameraAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
-
-        CameraInfo cameraInfo = EditProfileModel.getInstance().getCameraInfoArrayList().get(position);
-
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.camera_grid_item, parent, false);
         }
@@ -86,8 +81,19 @@ public class ChoesnProfileCameraAdapter extends BaseAdapter {
 
         ImageView imageView = (ImageView) convertView.findViewById(R.id.camera_view);
 
-        imageView.setImageResource(cameraInfo.getBitmap());
-
+        imageView.setImageResource(mThumbIds[position]);
         return convertView;
     }
+
+    // references to our images
+    public Integer[] mThumbIds = {
+            R.drawable.sample_2, R.drawable.sample_3,
+            R.drawable.sample_4, R.drawable.sample_5,
+            R.drawable.sample_6, R.drawable.sample_7,
+            R.drawable.sample_0, R.drawable.sample_1,
+            R.drawable.sample_2, R.drawable.sample_3,
+            R.drawable.sample_4, R.drawable.sample_5,
+
+//            R.drawable.sample_6, R.drawable.sample_7
+    };
 }
