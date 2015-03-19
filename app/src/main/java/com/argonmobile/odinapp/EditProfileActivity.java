@@ -3,6 +3,7 @@ package com.argonmobile.odinapp;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.os.Environment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -61,7 +62,7 @@ public class EditProfileActivity extends ActionBarActivity {
 
             @Override
             public void onScaleEnd() {
-                Log.e(TAG, "onScaleEnd....");
+                Log.e(TAG, "onScaleEnd....: " + mScaleFactor);
                 if (mViewPager.getCurrentItem() != 1) {
                     return;
                 }
@@ -82,7 +83,15 @@ public class EditProfileActivity extends ActionBarActivity {
                     startActivity(intent);
                 } else if (mScaleFactor < 0.7f) {
                     Intent intent = new Intent(EditProfileActivity.this, TempChosenProfileActivity.class);
+                    View view = mEditProfilePageAdapter.getRegisteredFragment(mViewPager.getCurrentItem()).getView();
+                    view.setDrawingCacheBackgroundColor(Color.BLACK);
+                    view.setDrawingCacheEnabled(true);
+                    view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+                    view.buildDrawingCache();
+                    Bitmap cache = view.getDrawingCache(true);
+                    storeImage(cache);
                     intent.putExtra(TempChosenProfileActivity.MODE_ENABLE_SELECT, false);
+                    intent.putExtra("TEST_BITMAP", pictureFile.getAbsolutePath());
                     startActivity(intent);
                 }
             }
@@ -102,8 +111,19 @@ public class EditProfileActivity extends ActionBarActivity {
             return;
         }
         try {
+            int oldWidth = image.getWidth();
+            int oldHeight = image.getHeight();
+            int newWidth = 760;
+            int newHeight = 480;
+
+            float scaleWidth = ((float) newWidth) / oldWidth;
+            float scaleHeight = ((float) newHeight) / oldHeight;
+
+            Matrix matrix = new Matrix();
             FileOutputStream fos = new FileOutputStream(pictureFile);
-            image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            matrix.postScale(scaleWidth, scaleHeight);
+            Bitmap _bitmapScaled = Bitmap.createBitmap(image, 0, 0,  oldWidth, oldHeight, matrix, true);
+            _bitmapScaled.compress(Bitmap.CompressFormat.JPEG, 40, fos);
             fos.close();
         } catch (FileNotFoundException e) {
             Log.d(TAG, "File not found: " + e.getMessage());

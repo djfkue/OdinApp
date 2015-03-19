@@ -225,9 +225,6 @@ public class TempChosenProfileActivity extends ActionBarActivity {
     }
 
     private void startChosenProfileActivity(TextView view) {
-        if (mIsAnimating) {
-            return;
-        }
 
         int[] screenLocation = new int[2];
         view.getLocationOnScreen(screenLocation);
