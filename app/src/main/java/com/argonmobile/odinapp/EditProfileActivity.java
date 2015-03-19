@@ -50,6 +50,9 @@ public class EditProfileActivity extends ActionBarActivity {
             @Override
             public void onScaleEnd() {
                 Log.e(TAG, "onScaleEnd....");
+                if (mViewPager.getCurrentItem() != 1) {
+                    return;
+                }
                 if (mScaleFactor < 1.0f && mScaleFactor > 0.7f) {
                     Intent intent = new Intent(EditProfileActivity.this, TempChosenProfileActivity.class);
                     intent.putExtra(TempChosenProfileActivity.MODE_ENABLE_SELECT, true);

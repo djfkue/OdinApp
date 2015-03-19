@@ -55,6 +55,9 @@ public class FindCameraActivity extends ActionBarActivity {
             @Override
             public void onScaleEnd() {
                 Log.e(TAG, "onScaleEnd....");
+                if (mViewPager.getCurrentItem() != 1) {
+                    return;
+                }
                 if (mScaleFactor < 0.9f) {
                     Intent intent = new Intent(FindCameraActivity.this, EditProfileActivity.class);
                     Bundle bundle = new Bundle();

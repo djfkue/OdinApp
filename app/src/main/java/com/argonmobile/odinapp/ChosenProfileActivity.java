@@ -55,7 +55,7 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
             @Override
             public void onScaleEnd() {
                 Log.e(TAG, "onScaleEnd....");
-                if (mScaleFactor > 1.1f) {
+                if (mScaleFactor < 0.7f) {
                     Intent intent = new Intent(ChosenProfileActivity.this, FindCameraActivity.class);
                     startActivity(intent);
                 }
