@@ -33,7 +33,7 @@ public class EditProfilePageAdapter extends FragmentStatePagerAdapter {
             fragment = new EditProfileFragment();
         }
         if (i == 2) {
-            fragment = new DemoObjectFragment();
+            fragment = new RecentCameraGridFragment();
         }
         return fragment;
     }

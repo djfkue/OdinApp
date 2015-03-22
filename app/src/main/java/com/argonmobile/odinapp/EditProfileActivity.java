@@ -90,7 +90,7 @@ public class EditProfileActivity extends ActionBarActivity {
                     view.buildDrawingCache();
                     Bitmap cache = view.getDrawingCache(true);
                     storeImage(cache);
-                    intent.putExtra(TempChosenProfileActivity.MODE_ENABLE_SELECT, false);
+                    intent.putExtra(TempChosenProfileActivity.MODE_ENABLE_SELECT, true);
                     intent.putExtra("TEST_BITMAP", pictureFile.getAbsolutePath());
                     startActivity(intent);
                 }

@@ -7,6 +7,7 @@
     <string name="title_activity_chosen_profile">ChosenProfileActivity</string>
     <string name="view_profile_title">[C] 默认预案 2015</string>
     <string name="title_activity_find_camera">[A] 选择摄像头</string>
+    <string name="title_activity_recent_camera">[+] 常用摄像头</string>
     <string name="edit_profile_title">[B] 默认预案 2015</string>
 
     <!-- TODO: Remove or change this placeholder text -->
