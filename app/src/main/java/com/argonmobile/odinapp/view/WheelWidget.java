@@ -97,6 +97,23 @@ public class WheelWidget extends ListView {
         }
     }
 
+    public int getCenterPosition() {
+        int firstChildPos = getFirstVisiblePosition();
+        View firstChild = this.getChildAt(firstChildPos);
+        if(firstChild != null) {
+            int remainVisible = (firstChild.getTop() + firstChild.getHeight()) % firstChild.getHeight();
+            Log.i(TAG, "remainVisible:" + remainVisible + ",firstChildPos:" + firstChildPos + ",firstChild.getTop():" + firstChild.getTop());
+            if((remainVisible > firstChild.getHeight() / 2) || (remainVisible == 0)) {
+                return firstChildPos;
+            } else {
+                // scroll to next
+                return  firstChildPos + 1;
+            }
+        }
+
+        return 0;
+    }
+
     public int getEnabledItemIndex() {
         return getFirstVisiblePosition() + 4;
     }
