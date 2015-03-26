@@ -67,7 +67,7 @@ public class WheelWidget extends ListView {
             if (content != null) {
                 content.setScaleY(rate);
                 int alpha = (int)(255 * rate);
-                content.setTextColor(Color.argb(alpha, 0, 0, 0));
+                content.setTextColor(Color.argb(alpha, 255, 255, 255));
                 //content.getPaint().setColor(Color.argb(alpha, 0, 0, 0));
                 //Log.i(TAG, "alpha:" + alpha);
             }

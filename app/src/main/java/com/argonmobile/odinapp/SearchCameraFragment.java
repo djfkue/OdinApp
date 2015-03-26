@@ -58,6 +58,30 @@ public class SearchCameraFragment extends Fragment {
                 //Log.i("TEst", "visibleItemCount:" + visibleItemCount);
             }
         });
+
+        final View searchCamera = rootView.findViewById(R.id.search_camera_view);
+        searchCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchCamera.animate().alpha(0).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        searchCamera.setVisibility(View.GONE);
+                    }
+                }).start();
+            }
+        });
+
+        View searchTrigger = rootView.findViewById(R.id.search_tap_view);
+        searchTrigger.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchCamera.setAlpha(1);
+                searchCamera.setTranslationY(-searchCamera.getHeight());
+                searchCamera.setVisibility(View.VISIBLE);
+                searchCamera.animate().translationY(0).start();
+            }
+        });
         return rootView;
     }
 

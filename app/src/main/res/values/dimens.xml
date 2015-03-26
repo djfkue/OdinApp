@@ -175,4 +175,65 @@
     <dimen name="histogram_bar_size">16.0dip</dimen>
     <dimen name="histogram_bar_padding">0.0dip</dimen>
     <dimen name="histogram_width">100.0dip</dimen>
+
+
+    <!-- The size of the application icon in the recents task view. -->
+    <dimen name="recents_task_view_application_icon_size">48dp</dimen>
+
+    <!-- The radius of the rounded corners on a task view. -->
+    <dimen name="recents_task_view_rounded_corners_radius">2dp</dimen>
+
+    <!-- The min translation in the Z index for the last task. -->
+    <dimen name="recents_task_view_z_min">20dp</dimen>
+
+    <!-- The max translation in the Z index for the last task. -->
+    <dimen name="recents_task_view_z_max">80dp</dimen>
+
+    <!-- The amount to translate when animating the removal of a task. -->
+    <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
+
+    <!-- The amount of highlight to make on each task view. -->
+    <dimen name="recents_task_view_highlight">1.5dp</dimen>
+
+    <!-- The amount to offset when animating into an affiliate group. -->
+    <dimen name="recents_task_view_affiliate_group_enter_offset">64dp</dimen>
+
+    <!-- The alpha to apply to a task thumbnail. -->
+    <item name="recents_task_view_thumbnail_alpha" format="float" type="dimen">0.9</item>
+
+    <!-- The height of a task view bar. -->
+    <dimen name="recents_task_bar_height">56dp</dimen>
+
+    <!-- The height of the search bar space. -->
+    <dimen name="recents_search_bar_space_height">64dp</dimen>
+
+    <!-- The side padding for the task stack as a percentage of the width. -->
+    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.0033</item>
+
+    <!-- The overscroll percentage allowed on the stack. -->
+    <item name="recents_stack_overscroll_percentage" format="float" type="dimen">0.0875</item>
+
+    <!-- The top offset for the task stack. -->
+    <dimen name="recents_stack_top_padding">16dp</dimen>
+
+    <!-- Used to calculate the translation animation duration, the expected amount of movement
+         in dps over one second of time. -->
+    <dimen name="recents_animation_movement_in_dps_per_second">800dp</dimen>
+
+    <!-- The min alpha to apply to a task affiliation group color. -->
+    <item name="recents_task_affiliation_color_min_alpha_percentage" format="float" type="dimen">0.6</item>
+
+    <!-- The size of the lock-to-app button. -->
+    <dimen name="recents_lock_to_app_size">56dp</dimen>
+
+    <!-- The size of the lock-to-app button icon. -->
+    <dimen name="recents_lock_to_app_icon_size">28dp</dimen>
+
+    <dimen name="recents_task_view_lock_to_app_button_height">48dp</dimen>
+
+    <!-- Inset shadow for FakeShadowDrawable. It is used to avoid gaps between the card
+     and the shadow. -->
+    <dimen name="fake_shadow_inset">1dp</dimen>
+
+    <dimen name="fake_shadow_size">8dp</dimen>
 </resources>

@@ -1,11 +1,19 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="@android:color/holo_green_dark">
+    <RelativeLayout
+        android:layout_width="700dp"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true">
 
-    <com.argonmobile.odinapp.cardsui.views.CardUI
-        android:id="@+id/cardsview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <!-- Recents View -->
+        <com.argonmobile.odinapp.view.RecentsView
+            android:id="@+id/recents_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:focusable="true"/>
 
+    </RelativeLayout>
 </RelativeLayout>

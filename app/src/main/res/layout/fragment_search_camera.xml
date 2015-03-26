@@ -1,8 +1,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.argonmobile.odinapp.SearchCameraFragment">
-
+    tools:context="com.argonmobile.odinapp.SearchCameraFragment"
+    android:background="#111320">
+    <View
+        android:id="@+id/search_tap_view"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"/>
     <com.argonmobile.odinapp.view.WheelWidget
         android:id="@+id/wheel"
         android:layout_width="match_parent"
@@ -12,4 +16,5 @@
         android:layout_alignParentBottom="true"
         android:overScrollMode="never"/>
 
+    <include layout="@layout/search_camera_view" />
 </RelativeLayout>

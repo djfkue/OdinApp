@@ -36,10 +36,10 @@ import java.util.ArrayList;
 public class ViewProfileFragment extends Fragment {
 
     private static final String TAG = "ViewProfileFragment";
-    private static final String ENABLE_ANIMATION = "enable_animation";
-    private static final String PROFILE_NAME = "profile_name";
-    private static final String PROFILE_ID = "profile_id";
-    private static final String PACKAGE_NAME = "com.argonmobile.odinapp";
+    public static final String ENABLE_ANIMATION = "enable_animation";
+    public static final String PROFILE_NAME = "profile_name";
+    public static final String PROFILE_ID = "profile_id";
+    public static final String PACKAGE_NAME = "com.argonmobile.odinapp";
 
     private static final int ANIM_DURATION = 380;
 

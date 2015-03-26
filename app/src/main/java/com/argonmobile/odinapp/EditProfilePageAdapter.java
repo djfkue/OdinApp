@@ -26,7 +26,7 @@ public class EditProfilePageAdapter extends FragmentStatePagerAdapter {
 
         Fragment fragment = null;
         if (i == 0) {
-            fragment = new DemoObjectFragment();
+            fragment = new RecentProfileFragment();
         }
 
         if (i == 1) {
