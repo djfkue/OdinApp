@@ -11,6 +11,8 @@ import com.argonmobile.odinapp.R;
 public class CheckedFrameLayout extends FrameLayout implements Checkable {
     private boolean mChecked;
 
+    OnCheckedListener mCheckListener;
+
     public CheckedFrameLayout(Context context) {
         super(context);
     }
@@ -33,10 +35,21 @@ public class CheckedFrameLayout extends FrameLayout implements Checkable {
         mChecked = checked;
         setBackgroundResource(checked ? R.drawable.image_border_bg_focus_blue
                 : R.drawable.grid_background);
+        if (mCheckListener != null) {
+            mCheckListener.onChecked(this, mChecked);
+        }
     }
 
     @Override
     public void toggle() {
         setChecked(!mChecked);
+    }
+
+    public void setOnCheckedListener(OnCheckedListener onCheckedListener) {
+        mCheckListener = onCheckedListener;
+    }
+
+    public interface OnCheckedListener {
+        public void onChecked(CheckedFrameLayout checkedFrameLayout, boolean checked);
     }
 }

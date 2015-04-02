@@ -4,13 +4,16 @@ package com.argonmobile.odinapp;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -25,6 +28,7 @@ import android.widget.TextView;
 import com.argonmobile.odinapp.dummy.EditProfileCameraAdapter;
 import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
+import com.argonmobile.odinapp.view.CheckedFrameLayout;
 import com.argonmobile.odinapp.view.FreeProfileLayoutView;
 import com.argonmobile.odinapp.view.ShadowLayout;
 
@@ -48,6 +52,7 @@ public class EditProfileFragment extends Fragment {
     private ColorDrawable mBackground;
     private TextView mTextView;
     private FreeProfileLayoutView mEditProfileLayoutView;
+    private CheckedFrameLayout mCurrentChecked;
 
     public EditProfileFragment() {
         // Required empty public constructor
@@ -61,6 +66,8 @@ public class EditProfileFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
         mEditProfileLayoutView = (FreeProfileLayoutView) rootView.findViewById(R.id.edit_container);
+
+        mEditProfileLayoutView.setOnDragListener(mFrameDragListener);
 
         mGridView = (GridView) rootView.findViewById(R.id.grid_view);
         mEditProfileCameraAdapter = new EditProfileCameraAdapter(rootView.getContext());
@@ -204,8 +211,103 @@ public class EditProfileFragment extends Fragment {
             ImageView imageView = (ImageView)child.findViewById(R.id.camera_view);
             imageView.setImageResource(cameraInfo.getBitmap());
             mEditProfileLayoutView.addView(child, layoutParams);
+            final CheckedFrameLayout checkedFrameLayout = (CheckedFrameLayout) child.findViewById(R.id.checked_frame);
+
+            //checkedFrameLayout.setOnDragListener(mDragListener);
+
+            checkedFrameLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkedFrameLayout.toggle();
+                    v.bringToFront();
+                }
+            });
+
+            checkedFrameLayout.setOnCheckedListener(new CheckedFrameLayout.OnCheckedListener() {
+                @Override
+                public void onChecked(CheckedFrameLayout checkedView, boolean checked) {
+                    if (checked == false) {
+                        checkedView.setOnTouchListener(null);
+                        if (mCurrentChecked == checkedView) {
+                            mCurrentChecked = null;
+                        }
+                    }
+                    if (mCurrentChecked != checkedView && checked) {
+                        if (mCurrentChecked != null) {
+                            mCurrentChecked.setChecked(false);
+                        }
+                        mCurrentChecked = checkedView;
+                        mCurrentChecked.setOnTouchListener(new View.OnTouchListener() {
+                            @Override
+                            public boolean onTouch(View view, MotionEvent motionEvent) {
+                                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                                    ClipData data = ClipData.newPlainText("", "");
+                                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
+                                    view.startDrag(data, shadowBuilder, view, 0);
+                                    view.setVisibility(View.INVISIBLE);
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            }
+                        });
+                    }
+                }
+            });
             mGridView.setVisibility(View.GONE);
         }
     }
+
+    private View.OnDragListener mFrameDragListener = new View.OnDragListener() {
+
+        float mStartX = 0;
+        float mStartY = 0;
+
+        @Override
+        public boolean onDrag(View v, DragEvent event) {
+
+            int action = event.getAction();
+
+            switch (event.getAction()) {
+                case DragEvent.ACTION_DRAG_STARTED:
+                    // do nothing
+
+                    mStartX = event.getX();
+                    mStartY = event.getY();
+
+                    Log.e(TAG, "ACTION_DRAG_STARTED................. x: " + mStartX);
+                    Log.e(TAG, "ACTION_DRAG_STARTED................. y: " + mStartY);
+                    break;
+                case DragEvent.ACTION_DRAG_ENTERED:
+                    break;
+                case DragEvent.ACTION_DRAG_EXITED:
+                    mStartX = 0;
+                    mStartY = 0;
+                    break;
+                case DragEvent.ACTION_DROP:
+                    // Dropped, reassign View to ViewGroup
+                    if (v.getId() == R.id.edit_container) {
+                        View view = (View) event.getLocalState();
+                        int[] screenLocation = new int[2];
+                        view.getLocationOnScreen(screenLocation);
+                        Log.e(TAG, "ACTION_DROP................. x: " + event.getX());
+                        Log.e(TAG, "ACTION_DROP................. y: " + event.getY());
+                        view.setX(event.getX() - mStartX + screenLocation[0]);
+                        view.setY(event.getY() - mStartY + screenLocation[1]);
+                        view.bringToFront();
+                        view.setVisibility(View.VISIBLE);
+                    }
+
+                    break;
+                case DragEvent.ACTION_DRAG_ENDED:
+                    mStartX = 0;
+                    mStartY = 0;
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        }
+    };
 
 }
