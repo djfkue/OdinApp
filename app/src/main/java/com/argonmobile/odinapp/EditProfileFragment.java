@@ -240,6 +240,7 @@ public class EditProfileFragment extends Fragment {
                         mCurrentChecked.setOnTouchListener(new View.OnTouchListener() {
                             @Override
                             public boolean onTouch(View view, MotionEvent motionEvent) {
+
                                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                                     ClipData data = ClipData.newPlainText("", "");
                                     View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
@@ -269,23 +270,23 @@ public class EditProfileFragment extends Fragment {
             int action = event.getAction();
 
             switch (event.getAction()) {
-                case DragEvent.ACTION_DRAG_STARTED:
+                case DragEvent.ACTION_DRAG_STARTED: {
                     // do nothing
-
                     mStartX = event.getX();
                     mStartY = event.getY();
 
                     Log.e(TAG, "ACTION_DRAG_STARTED................. x: " + mStartX);
-                    Log.e(TAG, "ACTION_DRAG_STARTED................. y: " + mStartY);
+                    Log.e(TAG, "ACTION_DRAG_STARTED................. y: " + mStartY);;
                     break;
+                }
                 case DragEvent.ACTION_DRAG_ENTERED:
+                    Log.e(TAG, "ACTION_DRAG_ENTERED ");
                     break;
                 case DragEvent.ACTION_DRAG_EXITED:
-                    mStartX = 0;
-                    mStartY = 0;
+                    Log.e(TAG, "ACTION_DRAG_EXITED ");
+
                     break;
                 case DragEvent.ACTION_DROP:
-                    // Dropped, reassign View to ViewGroup
                     if (v.getId() == R.id.edit_container) {
                         View view = (View) event.getLocalState();
                         int[] screenLocation = new int[2];
@@ -300,8 +301,12 @@ public class EditProfileFragment extends Fragment {
 
                     break;
                 case DragEvent.ACTION_DRAG_ENDED:
+                    Log.e(TAG, "ACTION_DRAG_ENDED ");
                     mStartX = 0;
                     mStartY = 0;
+                    View view = (View) event.getLocalState();
+                    view.bringToFront();
+                    view.setVisibility(View.VISIBLE);
                     break;
                 default:
                     break;
