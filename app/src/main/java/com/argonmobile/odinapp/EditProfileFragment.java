@@ -213,7 +213,7 @@ public class EditProfileFragment extends Fragment {
             mEditProfileLayoutView.addView(child, layoutParams);
             final CheckedFrameLayout checkedFrameLayout = (CheckedFrameLayout) child.findViewById(R.id.checked_frame);
 
-            //checkedFrameLayout.setOnDragListener(mDragListener);
+            checkedFrameLayout.setOnDragListener(mCameraDragListener);
 
             checkedFrameLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -228,6 +228,7 @@ public class EditProfileFragment extends Fragment {
                 public void onChecked(CheckedFrameLayout checkedView, boolean checked) {
                     if (checked == false) {
                         checkedView.setOnTouchListener(null);
+                        checkedView.setOnDragListener(mCameraDragListener);
                         if (mCurrentChecked == checkedView) {
                             mCurrentChecked = null;
                         }
@@ -235,8 +236,10 @@ public class EditProfileFragment extends Fragment {
                     if (mCurrentChecked != checkedView && checked) {
                         if (mCurrentChecked != null) {
                             mCurrentChecked.setChecked(false);
+                            //mCurrentChecked.setOnDragListener(mCameraDragListener);
                         }
                         mCurrentChecked = checkedView;
+                        Log.e(TAG, "current checked: " +mCurrentChecked.toString());
                         mCurrentChecked.setOnTouchListener(new View.OnTouchListener() {
                             @Override
                             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -252,6 +255,7 @@ public class EditProfileFragment extends Fragment {
                                 }
                             }
                         });
+                        mCurrentChecked.setOnDragListener(null);
                     }
                 }
             });
@@ -281,6 +285,8 @@ public class EditProfileFragment extends Fragment {
                 }
                 case DragEvent.ACTION_DRAG_ENTERED:
                     Log.e(TAG, "ACTION_DRAG_ENTERED ");
+                    mStartX = event.getX();
+                    mStartY = event.getY();
                     break;
                 case DragEvent.ACTION_DRAG_EXITED:
                     Log.e(TAG, "ACTION_DRAG_EXITED ");
@@ -315,4 +321,59 @@ public class EditProfileFragment extends Fragment {
         }
     };
 
+    private View.OnDragListener mCameraDragListener = new View.OnDragListener() {
+
+        float mStartX = 0;
+        float mStartY = 0;
+
+        @Override
+        public boolean onDrag(View v, DragEvent event) {
+
+            int action = event.getAction();
+            Log.e(TAG, "Camera onDrag.................: " + event.toString());
+            switch (event.getAction()) {
+                case DragEvent.ACTION_DRAG_STARTED: {
+                    // do nothing
+                    mStartX = event.getX();
+                    mStartY = event.getY();
+
+                    Log.e(TAG, "Camera ACTION_DRAG_STARTED................. x: " + mStartX);
+                    Log.e(TAG, "Camera ACTION_DRAG_STARTED................. y: " + mStartY);
+                    return true;
+                    //break;
+                }
+                case DragEvent.ACTION_DRAG_ENTERED:
+                    Log.e(TAG, "Camera ACTION_DRAG_ENTERED................. x: " + event.getX());
+                    Log.e(TAG, "Camera ACTION_DRAG_ENTERED................. y: " + event.getY());
+                    break;
+                case DragEvent.ACTION_DRAG_EXITED:
+                    Log.e(TAG, "Camera ACTION_DRAG_EXITED ");
+
+                    break;
+                case DragEvent.ACTION_DROP:
+                    if (v.getId() == R.id.checked_frame) {
+                        View view = (View) event.getLocalState();
+                        int[] screenLocation = new int[2];
+                        view.getLocationOnScreen(screenLocation);
+                        Log.e(TAG, "Camera ACTION_DROP................. x: " + event.getX());
+                        Log.e(TAG, "Camera ACTION_DROP................. y: " + event.getY());
+                        view.setX(event.getX() - mStartX + screenLocation[0]);
+                        view.setY(event.getY() - mStartY + screenLocation[1]);
+                        view.bringToFront();
+                        view.setVisibility(View.VISIBLE);
+                    }
+
+                    break;
+                case DragEvent.ACTION_DRAG_ENDED:
+                    Log.e(TAG, "Camera ACTION_DRAG_ENDED ");
+                    mStartX = 0;
+                    mStartY = 0;
+                    return false;
+                    //break;
+                default:
+                    break;
+            }
+            return true;
+        }
+    };
 }
