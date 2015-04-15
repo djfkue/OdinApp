@@ -280,8 +280,8 @@ public class EditProfileFragment extends Fragment {
                     mStartY = event.getY();
 
                     Log.e(TAG, "ACTION_DRAG_STARTED................. x: " + mStartX);
-                    Log.e(TAG, "ACTION_DRAG_STARTED................. y: " + mStartY);;
-                    break;
+                    Log.e(TAG, "ACTION_DRAG_STARTED................. y: " + mStartY);
+
                 }
                 case DragEvent.ACTION_DRAG_ENTERED:
                     Log.e(TAG, "ACTION_DRAG_ENTERED ");
@@ -330,7 +330,7 @@ public class EditProfileFragment extends Fragment {
         public boolean onDrag(View v, DragEvent event) {
 
             int action = event.getAction();
-            Log.e(TAG, "Camera onDrag.................: " + event.toString());
+            Log.e(TAG, "Camera onDrag.................: " + v.toString());
             switch (event.getAction()) {
                 case DragEvent.ACTION_DRAG_STARTED: {
                     // do nothing
@@ -339,7 +339,16 @@ public class EditProfileFragment extends Fragment {
 
                     Log.e(TAG, "Camera ACTION_DRAG_STARTED................. x: " + mStartX);
                     Log.e(TAG, "Camera ACTION_DRAG_STARTED................. y: " + mStartY);
-                    return true;
+
+                    int[] screenLocation = new int[2];
+                    v.getLocationOnScreen(screenLocation);
+                    if (mStartX - screenLocation[0] < v.getWidth() && mStartY - screenLocation[1] < v.getHeight()) {
+                        Log.e(TAG, "hit in the view");
+                        return true;
+                    } else {
+                        Log.e(TAG, "hit out of the view");
+                        return false;
+                    }
                     //break;
                 }
                 case DragEvent.ACTION_DRAG_ENTERED:
