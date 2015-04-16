@@ -6,8 +6,11 @@ import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.content.ClipData;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -282,11 +285,15 @@ public class EditProfileFragment extends Fragment {
                     Log.e(TAG, "ACTION_DRAG_STARTED................. x: " + mStartX);
                     Log.e(TAG, "ACTION_DRAG_STARTED................. y: " + mStartY);
 
+
                 }
                 case DragEvent.ACTION_DRAG_ENTERED:
-                    Log.e(TAG, "ACTION_DRAG_ENTERED ");
-                    mStartX = event.getX();
-                    mStartY = event.getY();
+//                    mStartX = event.getX();
+//                    mStartY = event.getY();
+
+                    Log.e(TAG, "ACTION_DRAG_ENTERED................. x: " + mStartX);
+                    Log.e(TAG, "ACTION_DRAG_ENTERED................. y: " + mStartY);
+
                     break;
                 case DragEvent.ACTION_DRAG_EXITED:
                     Log.e(TAG, "ACTION_DRAG_EXITED ");
@@ -295,12 +302,10 @@ public class EditProfileFragment extends Fragment {
                 case DragEvent.ACTION_DROP:
                     if (v.getId() == R.id.edit_container) {
                         View view = (View) event.getLocalState();
-                        int[] screenLocation = new int[2];
-                        view.getLocationOnScreen(screenLocation);
                         Log.e(TAG, "ACTION_DROP................. x: " + event.getX());
                         Log.e(TAG, "ACTION_DROP................. y: " + event.getY());
-                        view.setX(event.getX() - mStartX + screenLocation[0]);
-                        view.setY(event.getY() - mStartY + screenLocation[1]);
+                        view.setX(event.getX() - view.getWidth() / 2);
+                        view.setY(event.getY() - view.getHeight() / 2);
                         view.bringToFront();
                         view.setVisibility(View.VISIBLE);
                     }
@@ -326,11 +331,14 @@ public class EditProfileFragment extends Fragment {
         float mStartX = 0;
         float mStartY = 0;
 
+        float mDeltaX = 0;
+        float mDeltaY = 0;
+
         @Override
         public boolean onDrag(View v, DragEvent event) {
 
             int action = event.getAction();
-            Log.e(TAG, "Camera onDrag.................: " + v.toString());
+            Log.e(TAG, "Camera onDrag.................: " + event.toString());
             switch (event.getAction()) {
                 case DragEvent.ACTION_DRAG_STARTED: {
                     // do nothing
@@ -342,15 +350,33 @@ public class EditProfileFragment extends Fragment {
 
                     int[] screenLocation = new int[2];
                     v.getLocationOnScreen(screenLocation);
-                    if (mStartX - screenLocation[0] < v.getWidth() && mStartY - screenLocation[1] < v.getHeight()) {
-                        Log.e(TAG, "hit in the view");
-                        return true;
-                    } else {
-                        Log.e(TAG, "hit out of the view");
-                        return false;
-                    }
-                    //break;
+                    Log.e(TAG, "Camera ACTION_DRAG_STARTED................. v x: " + screenLocation[0]);
+                    Log.e(TAG, "Camera ACTION_DRAG_STARTED................. v y: " + screenLocation[1]);
+
+//                    if ((screenLocation[0] + v.getWidth()) > mStartX && (screenLocation[1] + v.getHeight()) > mStartY) {
+//                        return true;
+//                    } else {
+//                        return false;
+//                    }
+                    break;
                 }
+
+                case DragEvent.ACTION_DRAG_LOCATION: {
+                    if (mDeltaX != 0) {
+                        mDeltaX += event.getX() - mStartX;
+                    } else {
+                        mDeltaX = event.getX();
+                    }
+                    if (mDeltaY != 0) {
+                        mDeltaY += event.getY() - mStartY;
+                    } else {
+                        mDeltaY = event.getY();
+                    }
+                    mStartX = event.getX();
+                    mStartY = event.getY();
+                    break;
+                }
+
                 case DragEvent.ACTION_DRAG_ENTERED:
                     Log.e(TAG, "Camera ACTION_DRAG_ENTERED................. x: " + event.getX());
                     Log.e(TAG, "Camera ACTION_DRAG_ENTERED................. y: " + event.getY());
@@ -362,14 +388,26 @@ public class EditProfileFragment extends Fragment {
                 case DragEvent.ACTION_DROP:
                     if (v.getId() == R.id.checked_frame) {
                         View view = (View) event.getLocalState();
-                        int[] screenLocation = new int[2];
-                        view.getLocationOnScreen(screenLocation);
-                        Log.e(TAG, "Camera ACTION_DROP................. x: " + event.getX());
-                        Log.e(TAG, "Camera ACTION_DROP................. y: " + event.getY());
-                        view.setX(event.getX() - mStartX + screenLocation[0]);
-                        view.setY(event.getY() - mStartY + screenLocation[1]);
+                        int[] dropViewScreenLocation = new int[2];
+                        v.getLocationOnScreen(dropViewScreenLocation);
+
+                        int[] dragViewScreenLocation = new int[2];
+                        view.getLocationOnScreen(dragViewScreenLocation);
+
+                        Log.e(TAG, "Camera ACTION_DROP................. x: " + dropViewScreenLocation[0]);
+                        Log.e(TAG, "Camera ACTION_DROP................. y: " + dropViewScreenLocation[1]);
+
+                        float deltaX = dragViewScreenLocation[0] - dropViewScreenLocation[0];
+                        float deltaY = dragViewScreenLocation[1] - dropViewScreenLocation[1];
+
+                        v.animate().translationXBy(deltaX).translationYBy(deltaY).withLayer();
+
+                        view.setX(v.getX());
+                        view.setY(v.getY());
+
                         view.bringToFront();
                         view.setVisibility(View.VISIBLE);
+
                     }
 
                     break;
@@ -385,4 +423,5 @@ public class EditProfileFragment extends Fragment {
             return true;
         }
     };
+
 }
