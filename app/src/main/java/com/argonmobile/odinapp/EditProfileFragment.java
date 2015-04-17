@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -243,9 +244,14 @@ public class EditProfileFragment extends Fragment {
                         }
                         mCurrentChecked = checkedView;
                         Log.e(TAG, "current checked: " +mCurrentChecked.toString());
+
+                        final ScaleGestureDetector scaleGestureDetector = new ScaleGestureDetector(getActivity(), new ScaleListener(mCurrentChecked));
+
                         mCurrentChecked.setOnTouchListener(new View.OnTouchListener() {
                             @Override
                             public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                                Log.e(TAG, "onTouch............" + motionEvent.getPointerCount() + " : " + motionEvent.getAction());
 
                                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                                     ClipData data = ClipData.newPlainText("", "");
@@ -258,6 +264,7 @@ public class EditProfileFragment extends Fragment {
                                 }
                             }
                         });
+
                         mCurrentChecked.setOnDragListener(null);
                     }
                 }
@@ -424,4 +431,29 @@ public class EditProfileFragment extends Fragment {
         }
     };
 
+    private class ScaleListener
+            extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+        private float mScaleFactor;
+        private View mView;
+
+        public ScaleListener(View view) {
+            mView = view;
+            mScaleFactor = 1.0f;
+        }
+
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            Log.e(TAG, "..............................");
+            mScaleFactor *= detector.getScaleFactor();
+
+            // Don't let the object get too small or too large.
+            mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, 5.0f));
+
+            mView.setScaleX(mScaleFactor);
+            mView.setScaleY(mScaleFactor);
+
+            return true;
+        }
+    }
 }

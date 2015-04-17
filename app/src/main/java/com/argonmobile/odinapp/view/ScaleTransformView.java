@@ -90,8 +90,14 @@ public class ScaleTransformView extends RelativeLayout {
 
     }
 
+    int mTriggerPointerCount = 5;
+
+    public void setTriggerPointerCount(int triggerPointerCount) {
+        mTriggerPointerCount = triggerPointerCount;
+    }
+
     private boolean checkGestureTrigger(MotionEvent ev) {
-        if (MotionEventCompat.getPointerCount(ev) >= 5 && MotionEventCompat.getPointerCount(ev) <= 6) {
+        if (MotionEventCompat.getPointerCount(ev) >= mTriggerPointerCount && MotionEventCompat.getPointerCount(ev) <= 6) {
             return true;
         } else {
             return false;
@@ -113,82 +119,6 @@ public class ScaleTransformView extends RelativeLayout {
         } else {
             return true;
         }
-    }
-
-    /**
-     * Gets the example string attribute value.
-     *
-     * @return The example string attribute value.
-     */
-    public String getExampleString() {
-        return mExampleString;
-    }
-
-    /**
-     * Sets the view's example string attribute value. In the example view, this string
-     * is the text to draw.
-     *
-     * @param exampleString The example string attribute value to use.
-     */
-    public void setExampleString(String exampleString) {
-        mExampleString = exampleString;
-    }
-
-    /**
-     * Gets the example color attribute value.
-     *
-     * @return The example color attribute value.
-     */
-    public int getExampleColor() {
-        return mExampleColor;
-    }
-
-    /**
-     * Sets the view's example color attribute value. In the example view, this color
-     * is the font color.
-     *
-     * @param exampleColor The example color attribute value to use.
-     */
-    public void setExampleColor(int exampleColor) {
-        mExampleColor = exampleColor;
-    }
-
-    /**
-     * Gets the example dimension attribute value.
-     *
-     * @return The example dimension attribute value.
-     */
-    public float getExampleDimension() {
-        return mExampleDimension;
-    }
-
-    /**
-     * Sets the view's example dimension attribute value. In the example view, this dimension
-     * is the font size.
-     *
-     * @param exampleDimension The example dimension attribute value to use.
-     */
-    public void setExampleDimension(float exampleDimension) {
-        mExampleDimension = exampleDimension;
-    }
-
-    /**
-     * Gets the example drawable attribute value.
-     *
-     * @return The example drawable attribute value.
-     */
-    public Drawable getExampleDrawable() {
-        return mExampleDrawable;
-    }
-
-    /**
-     * Sets the view's example drawable attribute value. In the example view, this drawable is
-     * drawn above the text.
-     *
-     * @param exampleDrawable The example drawable attribute value to use.
-     */
-    public void setExampleDrawable(Drawable exampleDrawable) {
-        mExampleDrawable = exampleDrawable;
     }
 
     /**
