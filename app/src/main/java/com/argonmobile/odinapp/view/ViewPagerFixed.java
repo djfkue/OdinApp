@@ -38,7 +38,7 @@ public class ViewPagerFixed extends ViewPager {
         return false;
     }
 
-
+/*
     @Override
     protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
 
@@ -87,5 +87,5 @@ public class ViewPagerFixed extends ViewPager {
         }
 
         return super.canScroll(v, checkV, dx, x, y);
-    }
+    }*/
 }

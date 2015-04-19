@@ -247,23 +247,23 @@ public class EditProfileFragment extends Fragment {
 
                         final ScaleGestureDetector scaleGestureDetector = new ScaleGestureDetector(getActivity(), new ScaleListener(mCurrentChecked));
 
-                        mCurrentChecked.setOnTouchListener(new View.OnTouchListener() {
-                            @Override
-                            public boolean onTouch(View view, MotionEvent motionEvent) {
-
-                                Log.e(TAG, "onTouch............" + motionEvent.getPointerCount() + " : " + motionEvent.getAction());
-
-                                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                                    ClipData data = ClipData.newPlainText("", "");
-                                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
-                                    view.startDrag(data, shadowBuilder, view, 0);
-                                    view.setVisibility(View.INVISIBLE);
-                                    return true;
-                                } else {
-                                    return false;
-                                }
-                            }
-                        });
+//                        mCurrentChecked.setOnTouchListener(new View.OnTouchListener() {
+//                            @Override
+//                            public boolean onTouch(View view, MotionEvent motionEvent) {
+//
+//                                Log.e(TAG, "onTouch............" + motionEvent.getPointerCount() + " : " + motionEvent.getAction());
+//
+//                                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+//                                    ClipData data = ClipData.newPlainText("", "");
+//                                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
+//                                    view.startDrag(data, shadowBuilder, view, 0);
+//                                    view.setVisibility(View.INVISIBLE);
+//                                    return true;
+//                                } else {
+//                                    return false;
+//                                }
+//                            }
+//                        });
 
                         mCurrentChecked.setOnDragListener(null);
                     }
@@ -315,6 +315,7 @@ public class EditProfileFragment extends Fragment {
                         view.setY(event.getY() - view.getHeight() / 2);
                         view.bringToFront();
                         view.setVisibility(View.VISIBLE);
+                        //mEditProfileLayoutView.getParent().requestDisallowInterceptTouchEvent(false);
                     }
 
                     break;
@@ -360,11 +361,6 @@ public class EditProfileFragment extends Fragment {
                     Log.e(TAG, "Camera ACTION_DRAG_STARTED................. v x: " + screenLocation[0]);
                     Log.e(TAG, "Camera ACTION_DRAG_STARTED................. v y: " + screenLocation[1]);
 
-//                    if ((screenLocation[0] + v.getWidth()) > mStartX && (screenLocation[1] + v.getHeight()) > mStartY) {
-//                        return true;
-//                    } else {
-//                        return false;
-//                    }
                     break;
                 }
 
@@ -395,25 +391,29 @@ public class EditProfileFragment extends Fragment {
                 case DragEvent.ACTION_DROP:
                     if (v.getId() == R.id.checked_frame) {
                         View view = (View) event.getLocalState();
-                        int[] dropViewScreenLocation = new int[2];
-                        v.getLocationOnScreen(dropViewScreenLocation);
+                        if (view.getWidth() * view.getScaleX() == v.getWidth() * v.getScaleX()) {
+                            int[] dropViewScreenLocation = new int[2];
+                            v.getLocationOnScreen(dropViewScreenLocation);
 
-                        int[] dragViewScreenLocation = new int[2];
-                        view.getLocationOnScreen(dragViewScreenLocation);
+                            int[] dragViewScreenLocation = new int[2];
+                            view.getLocationOnScreen(dragViewScreenLocation);
 
-                        Log.e(TAG, "Camera ACTION_DROP................. x: " + dropViewScreenLocation[0]);
-                        Log.e(TAG, "Camera ACTION_DROP................. y: " + dropViewScreenLocation[1]);
+                            Log.e(TAG, "Camera ACTION_DROP................. x: " + dropViewScreenLocation[0]);
+                            Log.e(TAG, "Camera ACTION_DROP................. y: " + dropViewScreenLocation[1]);
 
-                        float deltaX = dragViewScreenLocation[0] - dropViewScreenLocation[0];
-                        float deltaY = dragViewScreenLocation[1] - dropViewScreenLocation[1];
+                            float deltaX = dragViewScreenLocation[0] - dropViewScreenLocation[0];
+                            float deltaY = dragViewScreenLocation[1] - dropViewScreenLocation[1];
 
-                        v.animate().translationXBy(deltaX).translationYBy(deltaY).withLayer();
+                            v.animate().translationXBy(deltaX).translationYBy(deltaY).withLayer();
 
-                        view.setX(v.getX());
-                        view.setY(v.getY());
+                            view.setX(v.getX());
+                            view.setY(v.getY());
 
-                        view.bringToFront();
-                        view.setVisibility(View.VISIBLE);
+                            view.bringToFront();
+                            view.setVisibility(View.VISIBLE);
+                        } else {
+                            return false;
+                        }
 
                     }
 

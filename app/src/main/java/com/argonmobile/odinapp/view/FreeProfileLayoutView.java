@@ -1,16 +1,19 @@
 package com.argonmobile.odinapp.view;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.MotionEventCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.RelativeLayout;
 
@@ -19,14 +22,10 @@ import android.widget.RelativeLayout;
  * TODO: document your custom view class.
  */
 public class FreeProfileLayoutView extends RelativeLayout {
-    private String mExampleString; // TODO: use a default from R.string...
-    private int mExampleColor = Color.RED; // TODO: use a default from R.color...
-    private float mExampleDimension = 0; // TODO: use a default from R.dimen...
-    private Drawable mExampleDrawable;
-
-    private TextPaint mTextPaint;
-    private float mTextWidth;
-    private float mTextHeight;
+    private static final String TAG = "FreeProfileLayoutView";
+    private CheckedFrameLayout mCheckedView;
+    private float mStartX;
+    private float mStartY;
 
     public FreeProfileLayoutView(Context context) {
         super(context);
@@ -34,99 +33,14 @@ public class FreeProfileLayoutView extends RelativeLayout {
 
     public FreeProfileLayoutView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
+        mScaleGestureDetector.setQuickScaleEnabled(true);
     }
 
     public FreeProfileLayoutView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    }
-
-
-    private void invalidateTextPaintAndMeasurements() {
-        mTextPaint.setTextSize(mExampleDimension);
-        mTextPaint.setColor(mExampleColor);
-        mTextWidth = mTextPaint.measureText(mExampleString);
-
-        Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
-        mTextHeight = fontMetrics.bottom;
-    }
-
-    /**
-     * Gets the example string attribute value.
-     *
-     * @return The example string attribute value.
-     */
-    public String getExampleString() {
-        return mExampleString;
-    }
-
-    /**
-     * Sets the view's example string attribute value. In the example view, this string
-     * is the text to draw.
-     *
-     * @param exampleString The example string attribute value to use.
-     */
-    public void setExampleString(String exampleString) {
-        mExampleString = exampleString;
-        invalidateTextPaintAndMeasurements();
-    }
-
-    /**
-     * Gets the example color attribute value.
-     *
-     * @return The example color attribute value.
-     */
-    public int getExampleColor() {
-        return mExampleColor;
-    }
-
-    /**
-     * Sets the view's example color attribute value. In the example view, this color
-     * is the font color.
-     *
-     * @param exampleColor The example color attribute value to use.
-     */
-    public void setExampleColor(int exampleColor) {
-        mExampleColor = exampleColor;
-        invalidateTextPaintAndMeasurements();
-    }
-
-    /**
-     * Gets the example dimension attribute value.
-     *
-     * @return The example dimension attribute value.
-     */
-    public float getExampleDimension() {
-        return mExampleDimension;
-    }
-
-    /**
-     * Sets the view's example dimension attribute value. In the example view, this dimension
-     * is the font size.
-     *
-     * @param exampleDimension The example dimension attribute value to use.
-     */
-    public void setExampleDimension(float exampleDimension) {
-        mExampleDimension = exampleDimension;
-        invalidateTextPaintAndMeasurements();
-    }
-
-    /**
-     * Gets the example drawable attribute value.
-     *
-     * @return The example drawable attribute value.
-     */
-    public Drawable getExampleDrawable() {
-        return mExampleDrawable;
-    }
-
-    /**
-     * Sets the view's example drawable attribute value. In the example view, this drawable is
-     * drawn above the text.
-     *
-     * @param exampleDrawable The example drawable attribute value to use.
-     */
-    public void setExampleDrawable(Drawable exampleDrawable) {
-        mExampleDrawable = exampleDrawable;
+        mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
+        mScaleGestureDetector.setQuickScaleEnabled(true);
     }
 
     @Override
@@ -145,6 +59,7 @@ public class FreeProfileLayoutView extends RelativeLayout {
 
         // Always handle the case of the touch gesture being complete.
         if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
+            getParent().requestDisallowInterceptTouchEvent(false);
             return false; // Do not intercept touch event, let the child handle it
         }
 
@@ -160,10 +75,21 @@ public class FreeProfileLayoutView extends RelativeLayout {
                 View view = getHitView(ev);
                 if (view != null) {
                     if (view instanceof CheckedFrameLayout) {
-                        Log.e("SD_TRACE", "touch down on me........");
-                        if (((CheckedFrameLayout) view).isChecked()) {
-                            Log.e("SD_TRACE", "check me check me........");
+                        Log.e("SD_TRACE", "touch down on checkedView: " + view.toString());
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                        if (((CheckedFrameLayout) view).isChecked() ) {
+                            mCheckedView = (CheckedFrameLayout) view;
+                            mStartX = ev.getX();
+                            mStartY = ev.getY();
+                            return true;
+                        } else {
+                            mCheckedView = (CheckedFrameLayout) view;
+                            mStartX = ev.getX();
+                            mStartY = ev.getY();
                         }
+                    } else {
+                        mCheckedView = null;
+                        return false;
                     }
                 }
                 break;
@@ -178,20 +104,102 @@ public class FreeProfileLayoutView extends RelativeLayout {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         Log.e("SD_TRACE", "onTouchEvent.....................:" + ev.getPointerCount());
-        Log.e("SD_TRACE", "onTouchEvent.....................:" + ev.getAction());
+        Log.e("SD_TRACE", "onTouchEvent.....................action:" + ev.getAction());
+        if (checkGestureTrigger(ev)) {
+            mIsTrigging = true;
+            getParent().requestDisallowInterceptTouchEvent(true);
+
+            mScaleGestureDetector.onTouchEvent(ev);
+        } else {
+            mIsTrigging = false;
+
+            if (ev.getAction() == MotionEvent.ACTION_MOVE && mCheckedView != null) {
+                if (Math.abs(ev.getX() - mStartX) > 10 && Math.abs(ev.getY() - mStartY) > 10) {
+                    ClipData data = ClipData.newPlainText("", "");
+                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(mCheckedView);
+                    mCheckedView.startDrag(data, shadowBuilder, mCheckedView, 0);
+                    mCheckedView.setVisibility(View.INVISIBLE);
+                }
+            }
+
+        }
+
+
         return true;
     }
+
+    private boolean checkGestureTrigger(MotionEvent ev) {
+        if (MotionEventCompat.getPointerCount(ev) == 2 ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     private View getHitView(MotionEvent ev) {
         int x = Math.round(ev.getX());
         int y = Math.round(ev.getY());
+        Rect rect = new Rect();
         for (int i=0; i<getChildCount(); i++){
             View child = getChildAt(i);
-            if(x > child.getLeft() && x < child.getRight() && y > child.getTop() && y < child.getBottom()){
+            child.getHitRect(rect);
+            if(x > rect.left && x < rect.right && y > rect.top && y < rect.bottom) {
                 //touch is within this child
                 return child;
             }
         }
         return null;
     }
+
+    private boolean mIsTrigging = false;
+
+    private ScaleGestureDetector mScaleGestureDetector;
+
+    /**
+     * The scale listener, used for handling multi-finger scale gestures.
+     */
+    private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener
+            = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
+        private float mScale;
+
+        public boolean onScale(ScaleGestureDetector detector) {
+            if (mIsTrigging) {
+                mScale *= detector.getScaleFactor();
+                Log.e(TAG, "onScale: " + mScale);
+                if (mCheckedView != null) {
+//                    RelativeLayout.LayoutParams params = (LayoutParams) mCheckedView.getLayoutParams();
+//                    params.width = (int) (mCheckedView.getWidth() * mScale);
+//                    params.height = (int) (mCheckedView.getHeight() * mScale);
+//                    mCheckedView.setLayoutParams(params);
+                    mCheckedView.setScaleX(mScale);
+                    mCheckedView.setScaleY(mScale);
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            if (mIsTrigging) {
+                Log.e(TAG, "onScaleBegin");
+                mScale = detector.getScaleFactor();
+
+                return true;
+            } else {
+                return true;
+            }
+        }
+
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            // Intentionally empty
+            if (mIsTrigging) {
+
+                Log.e(TAG, "onScaleEnd: " + detector.getScaleFactor());
+                mScale = Float.NaN;
+            }
+        }
+    };
 }
