@@ -71,6 +71,7 @@ public class FreeProfileLayoutView extends RelativeLayout {
                     return false;
                 }
             }
+
             case MotionEvent.ACTION_DOWN: {
                 View view = getHitView(ev);
                 if (view != null) {
@@ -113,7 +114,7 @@ public class FreeProfileLayoutView extends RelativeLayout {
         } else {
             mIsTrigging = false;
 
-            if (ev.getAction() == MotionEvent.ACTION_MOVE && mCheckedView != null) {
+            if (ev.getAction() == MotionEvent.ACTION_MOVE && getHitView(ev) != null && mCheckedView != null) {
                 if (Math.abs(ev.getX() - mStartX) > 10 && Math.abs(ev.getY() - mStartY) > 10) {
                     ClipData data = ClipData.newPlainText("", "");
                     View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(mCheckedView);
