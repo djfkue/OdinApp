@@ -17,17 +17,19 @@
         />
 
     <View
+        android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
+        android:layout_marginBottom="8dp"
         android:layout_below="@+id/title_view"
         android:background="@android:color/white"/>
     <HorizontalScrollView
         android:id="@+id/ScrollView01"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/title_view"
+        android:layout_below="@+id/divider"
         android:fillViewport="true"
         android:scrollbars="none" >
         <LinearLayout
@@ -39,11 +41,7 @@
             <com.argonmobile.odinapp.view.FreeProfileLayoutView
                 android:id="@+id/edit_container"
                 android:layout_width="2000dp"
-                android:layout_height="match_parent"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp">
+                android:layout_height="match_parent">
             </com.argonmobile.odinapp.view.FreeProfileLayoutView>
         </LinearLayout>
     </HorizontalScrollView>
@@ -51,14 +49,9 @@
         android:id="@+id/grid_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_below="@+id/title_view"
-        android:horizontalSpacing="10dp"
-        android:verticalSpacing="10dp"
+        android:layout_below="@+id/divider"
+        android:horizontalSpacing="2dp"
+        android:verticalSpacing="2dp"
         android:gravity="center"
-        android:numColumns="5"/>
-
+        android:numColumns="5" />
 </RelativeLayout>

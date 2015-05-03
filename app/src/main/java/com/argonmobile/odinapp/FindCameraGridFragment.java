@@ -1,19 +1,20 @@
 package com.argonmobile.odinapp;
 
 
-import android.animation.TimeInterpolator;
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.argonmobile.odinapp.dummy.ImageAdapter;
@@ -21,22 +22,17 @@ import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
 import com.argonmobile.odinapp.protocol.command.Command;
 import com.argonmobile.odinapp.protocol.command.GetInputInfoResponse;
-import com.argonmobile.odinapp.protocol.command.GetOutputInfoResponse;
-import com.argonmobile.odinapp.protocol.command.GetPlanListResponse;
-import com.argonmobile.odinapp.protocol.command.GetPlanWindowInfoResponse;
-import com.argonmobile.odinapp.protocol.command.GetPlanWindowListResponse;
-import com.argonmobile.odinapp.protocol.command.GetWindowStructureResponse;
 import com.argonmobile.odinapp.protocol.command.Request;
 import com.argonmobile.odinapp.protocol.command.RequestFactory;
 import com.argonmobile.odinapp.protocol.connection.CommandListener;
 import com.argonmobile.odinapp.protocol.connection.ConnectionManager;
 import com.argonmobile.odinapp.protocol.connection.ControlConnection;
 import com.argonmobile.odinapp.protocol.deviceinfo.InputInfo;
-import com.argonmobile.odinapp.protocol.deviceinfo.OutputInfo;
-import com.argonmobile.odinapp.protocol.deviceinfo.PlanInfo;
-import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
+import com.argonmobile.odinapp.protocol.image.ImageUpdater;
+import com.argonmobile.odinapp.view.CheckedFrameLayout;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -45,19 +41,41 @@ import java.util.ArrayList;
 public class FindCameraGridFragment extends Fragment {
 
     private static final String TAG = "FindCameraGridFragment";
-//    private static final int ANIM_DURATION = 500;
-//
-//    private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
-//    private static final TimeInterpolator sAccelerator = new AccelerateInterpolator();
+    private static final int MSG_ON_GET_INPUT_INFO_LIST = 0x01;
 
-//    private OnExitAnimationListener mOnExitAnimationListner;
+    private ArrayList<InputInfo> mInputInfos = new ArrayList<>();
 
-    private ImageAdapter mImageAdapter;
+    private ImageUpdater imageUpdater = new ImageUpdater();
+
+    private Handler mHandler;
+
+    private Handler.Callback callback = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            if(msg.what == MSG_ON_GET_INPUT_INFO_LIST) {
+                mInputInfos.clear();
+                List<InputInfo> inputInfos = (List<InputInfo>) msg.obj;
+
+                Log.e(TAG, "============== getCount: " + inputInfos.size());
+                for (InputInfo inputInfo : inputInfos) {
+                    mInputInfos.add(inputInfo);
+                }
+                mInputAdapter.notifyDataSetChanged();
+
+                //gridview.setAdapter(mInputAdapter);
+                //updateInputInfoAdapter();
+            }
+            return true;
+        }
+    };
+
+    private InputAdapter mInputAdapter;
     private GridView gridview;
     private TextView mTextView;
 
     public FindCameraGridFragment() {
         // Required empty public constructor
+        mHandler = new Handler(callback);
     }
 
     @Override
@@ -78,15 +96,15 @@ public class FindCameraGridFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_find_camera_grid, container, false);
         gridview = (GridView) rootView.findViewById(R.id.grid_view);
 
-        mImageAdapter = new ImageAdapter(rootView.getContext());
+        mInputAdapter = new InputAdapter(rootView.getContext());
 
-        gridview.setAdapter(mImageAdapter);
+        gridview.setAdapter(mInputAdapter);
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mImageAdapter.toggleItemChecked(position);
-                if (mImageAdapter.isItemChecked(position)) {
-                    CameraInfo cameraInfo = new CameraInfo(view.getTop(), view.getLeft(), view.getWidth(), view.getHeight(), position, mImageAdapter.mThumbIds[position]);
+                mInputAdapter.toggleItemChecked(position);
+                if (mInputAdapter.isItemChecked(position)) {
+                    CameraInfo cameraInfo = new CameraInfo(view.getTop(), view.getLeft(), view.getWidth(), view.getHeight(), position, R.drawable.sample_0);
                     EditProfileModel.getInstance().addCameraInfo(cameraInfo);
                 } else {
                     EditProfileModel.getInstance().removeCameraInfo(position);
@@ -94,9 +112,23 @@ public class FindCameraGridFragment extends Fragment {
             }
         });
 
+
         mTextView = (TextView) rootView.findViewById(R.id.title_view);
 
         return rootView;
+    }
+
+    @Override
+    public void onResume () {
+        super.onResume();
+    }
+
+    @Override
+    public void onStop () {
+        super.onStop();
+        for (InputInfo inputInfo : mInputInfos) {
+            ConnectionManager.defaultManager.stopJpgTransport(new byte[]{(byte) inputInfo.inputIndex});
+        }
     }
 
     CommandListener commandListener = new CommandListener() {
@@ -111,6 +143,14 @@ public class FindCameraGridFragment extends Fragment {
             if(cmd instanceof GetInputInfoResponse) {
 
                 GetInputInfoResponse r = (GetInputInfoResponse) cmd;
+
+                Message message = new Message();
+                message.what = MSG_ON_GET_INPUT_INFO_LIST;
+
+                message.obj = r.inputInfos;
+
+                mHandler.sendMessage(message);
+
                 for (InputInfo ii : r.inputInfos) {
                     Log.i(TAG, "get input info, ii:" + ii);
                 }
@@ -119,5 +159,75 @@ public class FindCameraGridFragment extends Fragment {
             }
         }
     };
+
+
+    private void updateInputInfoAdapter() {
+
+    }
+
+    private class InputAdapter extends BaseAdapter {
+        private LayoutInflater mInflater;
+        private Context mContext;
+
+        private SparseBooleanArray mCheckStates;
+        private int mCheckedItemCount;
+
+        public InputAdapter(Context c) {
+            mContext = c;
+            mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mCheckedItemCount = 0;
+            mCheckStates = new SparseBooleanArray();
+        }
+
+
+        public boolean isItemChecked(int position) {
+            return mCheckStates.get(position);
+        }
+
+        public void toggleItemChecked(int position) {
+            boolean oldValue = mCheckStates.get(position);
+            mCheckStates.put(position, !oldValue);
+            if (oldValue) {
+                mCheckedItemCount--;
+            } else {
+                mCheckedItemCount++;
+            }
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public int getCount() {
+            return mInputInfos.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return mInputInfos.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return mInputInfos.get(position).inputIndex;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.camera_grid_item, parent, false);
+            }
+            //final float scale = mContext.getResources().getDisplayMetrics().density;
+            //convertView.setLayoutParams(new GridView.LayoutParams((int)(220 * scale), (int)(135 * scale)));
+
+            CheckedFrameLayout checkedLayout = (CheckedFrameLayout) convertView.findViewById(R.id.checked_frame);
+            checkedLayout.setChecked(isItemChecked(position));
+
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.camera_view);
+            //imageView.setImageResource(R.drawable.sample_0);
+            imageUpdater.subscribe(mInputInfos.get(position).inputIndex, imageView);
+            ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
+                    (short)480, (short)270, new byte[]{(byte) mInputInfos.get(position).inputIndex});
+            return convertView;
+        }
+    }
 
 }
