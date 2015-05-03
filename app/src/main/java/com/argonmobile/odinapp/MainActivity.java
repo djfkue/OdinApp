@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
+import com.argonmobile.odinapp.model.WindowStructure;
 import com.argonmobile.odinapp.protocol.command.Command;
 import com.argonmobile.odinapp.protocol.command.GetInputInfoResponse;
 import com.argonmobile.odinapp.protocol.command.GetOutputInfoResponse;
@@ -54,11 +55,6 @@ public class MainActivity extends ActionBarActivity {
     private void onGetControlConnection() {
         Log.i(TAG, "onGetControlConnection");
 
-        Intent intent = new Intent(this, ChosenProfileActivity.class);
-
-        startActivity(intent);
-        finish();
-        /*
         ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
         con.addCommandListener(commandListener);
 
@@ -92,7 +88,6 @@ public class MainActivity extends ActionBarActivity {
             Request req = RequestFactory.createGetPlanWindowInfoRequest();
             con.sendCommand(req);
         }
-        */
         /*
         {
             Request req = RequestFactory.createJpgRequest(CommandDefs.PARAM_SIGNAL_IMAGE, true,
@@ -113,9 +108,21 @@ public class MainActivity extends ActionBarActivity {
             Log.i(TAG, "onReceivedCommand:" + cmd);
             if (cmd instanceof GetWindowStructureResponse) {
                 GetWindowStructureResponse r = (GetWindowStructureResponse) cmd;
+                WindowStructure.getInstance().screenGroups = r.screenGroups;
                 for (ScreenGroup sg : r.screenGroups) {
                     Log.i(TAG, "get window structure, sg:" + sg);
                 }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        Intent intent = new Intent(MainActivity.this, ChosenProfileActivity.class);
+
+                        startActivity(intent);
+                        finish();
+
+                    }
+                });
             } else if(cmd instanceof GetPlanListResponse) {
                 GetPlanListResponse r = (GetPlanListResponse) cmd;
                 for(PlanInfo pi : r.planInfos) {

@@ -27,6 +27,11 @@ public class FreeProfileLayoutView extends RelativeLayout {
     private float mStartX;
     private float mStartY;
 
+    private int mVScreenCount = 1;
+    private int mHScreenCount = 1;
+
+    private Paint mRectPaint;
+
     public FreeProfileLayoutView(Context context) {
         super(context);
     }
@@ -35,12 +40,28 @@ public class FreeProfileLayoutView extends RelativeLayout {
         super(context, attrs);
         mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
         mScaleGestureDetector.setQuickScaleEnabled(true);
+        mRectPaint = new Paint();
+        mRectPaint.setColor(Color.WHITE);
+        mRectPaint.setStrokeWidth(3.0f);
     }
 
     public FreeProfileLayoutView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
         mScaleGestureDetector.setQuickScaleEnabled(true);
+    }
+
+    public void setVScreenCount(int vScreens) {
+        mVScreenCount = vScreens;
+    }
+
+    public void setHScreenCount(int hScreenCount) {
+        mHScreenCount = hScreenCount;
+    }
+
+    @Override
+    protected void onDraw (Canvas canvas) {
+        canvas.drawRect(getLeft(), getTop(), getRight(), getBottom(), mRectPaint);
     }
 
     @Override

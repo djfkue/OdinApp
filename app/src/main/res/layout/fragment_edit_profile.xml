@@ -30,6 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/divider"
+        android:layout_centerHorizontal="true"
         android:fillViewport="true"
         android:scrollbars="none" >
         <LinearLayout
@@ -37,10 +38,11 @@
             android:layout_height="match_parent"
             android:focusable="true"
             android:focusableInTouchMode="true"
+            android:gravity="center"
             android:descendantFocusability="beforeDescendants">
             <com.argonmobile.odinapp.view.FreeProfileLayoutView
                 android:id="@+id/edit_container"
-                android:layout_width="2000dp"
+                android:layout_width="800dp"
                 android:layout_height="match_parent">
             </com.argonmobile.odinapp.view.FreeProfileLayoutView>
         </LinearLayout>

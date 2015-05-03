@@ -32,6 +32,8 @@ import android.widget.TextView;
 import com.argonmobile.odinapp.dummy.EditProfileCameraAdapter;
 import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
+import com.argonmobile.odinapp.model.WindowStructure;
+import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
 import com.argonmobile.odinapp.view.CheckedFrameLayout;
 import com.argonmobile.odinapp.view.FreeProfileLayoutView;
 import com.argonmobile.odinapp.view.ShadowLayout;
@@ -85,6 +87,23 @@ public class EditProfileFragment extends Fragment {
                     mGridView.getViewTreeObserver().removeOnPreDrawListener(this);
 
                     runEnterAnimation();
+
+                    ScreenGroup screenGroup = WindowStructure.getInstance().screenGroups[0];
+
+                    float screenWidth = 2 * screenGroup.horizontalCount * 1920.0f;
+                    float screenHeight = screenGroup.verticalCount * 1080.0f;
+
+                    boolean isLandScape = screenWidth > screenHeight ? true : false;
+
+                    //if (isLandScape) {
+                    int height = mEditProfileLayoutView.getMeasuredHeight();
+                    Log.d(TAG, "editProfileLayoutHeight: " + height);
+                    int width = (int) (height * ( screenWidth / screenHeight ));
+                    ViewGroup.LayoutParams layoutParams = mEditProfileLayoutView.getLayoutParams();
+                    layoutParams.width = width;
+                    mEditProfileLayoutView.setLayoutParams(layoutParams);
+                    //mEditProfileLayoutView.setBackgroundColor(Color.BLUE);
+                    //}
 
                     return true;
                 }
