@@ -77,13 +77,15 @@ public class FreeProfileLayoutView extends RelativeLayout {
                 if (view != null) {
                     if (view instanceof CheckedFrameLayout) {
                         Log.e("SD_TRACE", "touch down on checkedView: " + view.toString());
-                        getParent().requestDisallowInterceptTouchEvent(true);
+
                         if (((CheckedFrameLayout) view).isChecked() ) {
+                            getParent().requestDisallowInterceptTouchEvent(true);
                             mCheckedView = (CheckedFrameLayout) view;
                             mStartX = ev.getX();
                             mStartY = ev.getY();
                             return true;
                         } else {
+                            getParent().requestDisallowInterceptTouchEvent(false);
                             mCheckedView = (CheckedFrameLayout) view;
                             mStartX = ev.getX();
                             mStartY = ev.getY();
