@@ -220,17 +220,19 @@ public class FreeProfileLayoutView extends RelativeLayout {
     };
 
     private void updateScaleViewProperty() {
-        Rect rect = new Rect();
-        mCheckedView.getHitRect(rect);
+        if (mCheckedView != null) {
+            Rect rect = new Rect();
+            mCheckedView.getHitRect(rect);
 
-        RelativeLayout.LayoutParams layoutParams = (LayoutParams) mCheckedView.getLayoutParams();
-        layoutParams.width = rect.width();
-        layoutParams.height = rect.height();
-        mCheckedView.setX(rect.left);
-        mCheckedView.setY(rect.top);
-        mCheckedView.setScaleX(1);
-        mCheckedView.setScaleY(1);
+            RelativeLayout.LayoutParams layoutParams = (LayoutParams) mCheckedView.getLayoutParams();
+            layoutParams.width = rect.width();
+            layoutParams.height = rect.height();
+            mCheckedView.setX(rect.left);
+            mCheckedView.setY(rect.top);
+            mCheckedView.setScaleX(1);
+            mCheckedView.setScaleY(1);
 
-        mCheckedView.setLayoutParams(layoutParams);
+            mCheckedView.setLayoutParams(layoutParams);
+        }
     }
 }
