@@ -19,6 +19,22 @@ import android.widget.TextView;
 import com.argonmobile.odinapp.dummy.ImageAdapter;
 import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
+import com.argonmobile.odinapp.protocol.command.Command;
+import com.argonmobile.odinapp.protocol.command.GetInputInfoResponse;
+import com.argonmobile.odinapp.protocol.command.GetOutputInfoResponse;
+import com.argonmobile.odinapp.protocol.command.GetPlanListResponse;
+import com.argonmobile.odinapp.protocol.command.GetPlanWindowInfoResponse;
+import com.argonmobile.odinapp.protocol.command.GetPlanWindowListResponse;
+import com.argonmobile.odinapp.protocol.command.GetWindowStructureResponse;
+import com.argonmobile.odinapp.protocol.command.Request;
+import com.argonmobile.odinapp.protocol.command.RequestFactory;
+import com.argonmobile.odinapp.protocol.connection.CommandListener;
+import com.argonmobile.odinapp.protocol.connection.ConnectionManager;
+import com.argonmobile.odinapp.protocol.connection.ControlConnection;
+import com.argonmobile.odinapp.protocol.deviceinfo.InputInfo;
+import com.argonmobile.odinapp.protocol.deviceinfo.OutputInfo;
+import com.argonmobile.odinapp.protocol.deviceinfo.PlanInfo;
+import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
 
 import java.util.ArrayList;
 
@@ -44,6 +60,16 @@ public class FindCameraGridFragment extends Fragment {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate (Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+        con.addCommandListener(commandListener);
+        { // test get input info
+            Request req = RequestFactory.createGetInputInfoRequest();
+            con.sendCommand(req);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -73,48 +99,25 @@ public class FindCameraGridFragment extends Fragment {
         return rootView;
     }
 
-//    @Override
-//    public void onAttach(Activity activity) {
-//        super.onAttach(activity);
-//        try {
-//            mOnExitAnimationListner = (OnExitAnimationListener) activity;
-//        } catch (ClassCastException e) {
-//            throw new ClassCastException(activity.toString()
-//                    + " must implement OnExitAnimationListener");
-//        }
-//    }
-//
-//    public void runExitAnimation() {
-//
-//        final long duration = (long) (ANIM_DURATION);
-//
-//        ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
-//        for (CameraInfo cameraInfo : cameraInfos) {
-//            View childView = gridview.getChildAt(cameraInfo.getId());
-//            int deltaLeft = cameraInfo.getLeft() - childView.getLeft();
-//
-//            int deltaTop = cameraInfo.getTop() - childView.getTop();
-//            Log.e(TAG, "animate deltaTop: " + deltaTop);
-//            Log.e(TAG, "animate deltaLeft: " + deltaLeft);
-//            childView.animate().setDuration(duration)
-//                    .translationY(deltaTop)
-//                    .translationX(deltaLeft)
-//                    .setInterpolator(sAccelerator).withLayer();
-//        }
-//        mTextView.animate().setDuration(duration).
-//                translationY(mTextView.getHeight()).alpha(0).
-//                setInterpolator(sDecelerator).withEndAction(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (mOnExitAnimationListner != null) {
-//                    mOnExitAnimationListner.onExitAnimationFinish();
-//                }
-//            }
-//        });
-//    }
-//
-//    public interface OnExitAnimationListener {
-//        public void onExitAnimationFinish();
-//    }
+    CommandListener commandListener = new CommandListener() {
+        @Override
+        public void onSentCommand(Command cmd) {
+            Log.i(TAG, "onSentCommand:" + cmd.command);
+        }
+
+        @Override
+        public void onReceivedCommand(Command cmd) {
+            Log.i(TAG, "onReceivedCommand:" + cmd);
+            if(cmd instanceof GetInputInfoResponse) {
+
+                GetInputInfoResponse r = (GetInputInfoResponse) cmd;
+                for (InputInfo ii : r.inputInfos) {
+                    Log.i(TAG, "get input info, ii:" + ii);
+                }
+//                ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
+//                        (short)480, (short)270, new byte[]{0x00});
+            }
+        }
+    };
 
 }

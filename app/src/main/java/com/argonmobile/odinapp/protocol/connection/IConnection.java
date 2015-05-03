@@ -1,0 +1,14 @@
+package com.argonmobile.odinapp.protocol.connection;
+
+import com.argonmobile.odinapp.protocol.command.Command;
+
+/**
+ * Created by sean on 4/19/15.
+ */
+public interface IConnection {
+    void sendCommand(Command cmd);
+    void addCommandListener(CommandListener cmdListener);
+    void removeCommandListener(CommandListener cmdListener);
+    void addStateListener(ConnectionStateListener stateListener);
+    void removeStateListener(ConnectionStateListener stateListener);
+}
