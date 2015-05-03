@@ -163,19 +163,26 @@ public class FreeProfileLayoutView extends RelativeLayout {
     private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener
             = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
-        private float mScale;
+        private float mScaleX;
+        private float mScaleY;
+
 
         public boolean onScale(ScaleGestureDetector detector) {
             if (mIsTrigging) {
-                mScale *= detector.getScaleFactor();
-                Log.e(TAG, "onScale: " + mScale);
+                float currentSpanX = detector.getCurrentSpanX();
+                float currentSpanY = detector.getCurrentSpanY();
+
+                float xScaleFactor = detector.getPreviousSpanX() > 0 ? currentSpanX / detector.getPreviousSpanX() : 1;
+                mScaleX *= xScaleFactor;
+
+                float yScaleFactor = detector.getPreviousSpanY() > 0 ? currentSpanY / detector.getPreviousSpanY() : 1;
+                mScaleY *= yScaleFactor;
+
+                Log.e(TAG, "onScaleX: " + mScaleX);
+                Log.e(TAG, "onScaleY: " + mScaleY);
                 if (mCheckedView != null) {
-//                    RelativeLayout.LayoutParams params = (LayoutParams) mCheckedView.getLayoutParams();
-//                    params.width = (int) (mCheckedView.getWidth() * mScale);
-//                    params.height = (int) (mCheckedView.getHeight() * mScale);
-//                    mCheckedView.setLayoutParams(params);
-                    mCheckedView.setScaleX(mScale);
-                    mCheckedView.setScaleY(mScale);
+                    mCheckedView.setScaleX(mScaleX);
+                    mCheckedView.setScaleY(mScaleY);
                 }
                 return true;
             } else {
@@ -186,8 +193,13 @@ public class FreeProfileLayoutView extends RelativeLayout {
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             if (mIsTrigging) {
                 Log.e(TAG, "onScaleBegin");
-                mScale = detector.getScaleFactor();
+                float currentSpanX = detector.getCurrentSpanX();
+                float currentSpanY = detector.getCurrentSpanY();
+                float xScaleFactor = detector.getPreviousSpanX() > 0 ? currentSpanX / detector.getPreviousSpanX() : 1;
+                mScaleX = xScaleFactor;
 
+                float yScaleFactor = detector.getPreviousSpanY() > 0 ? currentSpanY / detector.getPreviousSpanY() : 1;
+                mScaleY = yScaleFactor;
                 return true;
             } else {
                 return true;
@@ -199,8 +211,26 @@ public class FreeProfileLayoutView extends RelativeLayout {
             if (mIsTrigging) {
 
                 Log.e(TAG, "onScaleEnd: " + detector.getScaleFactor());
-                mScale = Float.NaN;
+                mScaleX = Float.NaN;
+                mStartY = Float.NaN;
             }
+            Log.e(TAG, "onScaleEnd......................");
+            updateScaleViewProperty();
         }
     };
+
+    private void updateScaleViewProperty() {
+        Rect rect = new Rect();
+        mCheckedView.getHitRect(rect);
+
+        RelativeLayout.LayoutParams layoutParams = (LayoutParams) mCheckedView.getLayoutParams();
+        layoutParams.width = rect.width();
+        layoutParams.height = rect.height();
+        mCheckedView.setX(rect.left);
+        mCheckedView.setY(rect.top);
+        mCheckedView.setScaleX(1);
+        mCheckedView.setScaleY(1);
+
+        mCheckedView.setLayoutParams(layoutParams);
+    }
 }
