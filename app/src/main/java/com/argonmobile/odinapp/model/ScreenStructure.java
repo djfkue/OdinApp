@@ -2,18 +2,18 @@ package com.argonmobile.odinapp.model;
 
 import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
 
-public class WindowStructure {
+public class ScreenStructure {
 
-    private static WindowStructure mInstance;
+    private static ScreenStructure mInstance;
     public ScreenGroup[] screenGroups;
 
-    private WindowStructure() {
+    private ScreenStructure() {
 
     }
 
-    static public WindowStructure getInstance() {
+    static public ScreenStructure getInstance() {
         if (mInstance == null) {
-            mInstance = new WindowStructure();
+            mInstance = new ScreenStructure();
         }
         return mInstance;
     }

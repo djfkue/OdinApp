@@ -4,19 +4,14 @@ package com.argonmobile.odinapp;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
-import android.content.ClipData;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +27,7 @@ import android.widget.TextView;
 import com.argonmobile.odinapp.dummy.EditProfileCameraAdapter;
 import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
-import com.argonmobile.odinapp.model.WindowStructure;
+import com.argonmobile.odinapp.model.ScreenStructure;
 import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
 import com.argonmobile.odinapp.view.CheckedFrameLayout;
 import com.argonmobile.odinapp.view.FreeProfileLayoutView;
@@ -88,12 +83,15 @@ public class EditProfileFragment extends Fragment {
 
                     runEnterAnimation();
 
-                    ScreenGroup screenGroup = WindowStructure.getInstance().screenGroups[0];
+                    ScreenGroup screenGroup = ScreenStructure.getInstance().screenGroups[0];
 
                     float screenWidth = screenGroup.horizontalCount * 1920.0f;
                     float screenHeight = screenGroup.verticalCount * 1080.0f;
 
                     boolean isLandScape = screenWidth > screenHeight ? true : false;
+
+                    mEditProfileLayoutView.setVScreenCount(screenGroup.verticalCount);
+                    mEditProfileLayoutView.setHScreenCount(screenGroup.horizontalCount);
 
                     //if (isLandScape) {
                     int height = mEditProfileLayoutView.getMeasuredHeight();

@@ -8,6 +8,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,8 +26,25 @@ import android.widget.TextView;
 import com.argonmobile.odinapp.dummy.ChosenProfileImageAdapter;
 import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
+import com.argonmobile.odinapp.model.ScreenStructure;
+import com.argonmobile.odinapp.model.WindowInfoModel;
+import com.argonmobile.odinapp.protocol.command.Command;
+import com.argonmobile.odinapp.protocol.command.GetInputInfoResponse;
+import com.argonmobile.odinapp.protocol.command.GetPlanWindowListResponse;
+import com.argonmobile.odinapp.protocol.command.Request;
+import com.argonmobile.odinapp.protocol.command.RequestFactory;
+import com.argonmobile.odinapp.protocol.connection.CommandListener;
+import com.argonmobile.odinapp.protocol.connection.ConnectionManager;
+import com.argonmobile.odinapp.protocol.connection.ControlConnection;
+import com.argonmobile.odinapp.protocol.deviceinfo.InputInfo;
+import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
+import com.argonmobile.odinapp.protocol.deviceinfo.WindowInfo;
+import com.argonmobile.odinapp.protocol.image.ImageUpdater;
+import com.argonmobile.odinapp.util.ScaleFactorCaculator;
+import com.argonmobile.odinapp.view.FreeProfileLayoutView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -47,6 +66,8 @@ public class ViewProfileFragment extends Fragment {
     private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
     private static final TimeInterpolator sAccelerator = new AccelerateInterpolator();
 
+    private static final int MSG_ON_GET_PLAN_WINDOW_LIST = 0x01;
+
     private OnFragmentInteractionListener mListener;
 
     private ColorDrawable mBackground;
@@ -60,7 +81,106 @@ public class ViewProfileFragment extends Fragment {
 
     private int mProfileId;
 
-    private RelativeLayout mEditProfileLayoutView;
+    private ImageUpdater imageUpdater = new ImageUpdater();
+
+    private FreeProfileLayoutView mEditProfileLayoutView;
+    private ArrayList<WindowInfo> mWindowInfos;
+    private Handler mHandler;
+
+    private Handler.Callback callback = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            if(msg.what == MSG_ON_GET_PLAN_WINDOW_LIST) {
+                mWindowInfos.clear();
+                List<WindowInfo> windowInfos = (List<WindowInfo>) msg.obj;
+
+                Log.e(TAG, "============== getCount: " + windowInfos.size());
+                for (WindowInfo windowInfo : windowInfos) {
+                    mWindowInfos.add(windowInfo);
+                }
+
+                updateWindowInfos();
+
+                //gridview.setAdapter(mInputAdapter);
+                //updateInputInfoAdapter();
+            }
+            return true;
+        }
+    };
+
+    private void updateWindowInfos() {
+
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        for (WindowInfo windowInfo : mWindowInfos) {
+            int windowTop = windowInfo.top;
+            int windowLeft = windowInfo.left;
+            int windowWidth = windowInfo.width;
+            int windowHeight = windowInfo.height;
+
+            int deviceWindowTop = ScaleFactorCaculator.getDeviceWindowTop(windowTop,
+                    mEditProfileLayoutView.getMeasuredWidth(),
+                    mEditProfileLayoutView.getMeasuredHeight());
+            int deviceWindowLeft = ScaleFactorCaculator.getDeviceWindowLeft(windowLeft,
+                    mEditProfileLayoutView.getMeasuredWidth(),
+                    mEditProfileLayoutView.getMeasuredHeight());
+
+            int deviceWindowWidth = ScaleFactorCaculator.getDeviceWindowWidth(windowWidth,
+                    mEditProfileLayoutView.getMeasuredWidth(),
+                    mEditProfileLayoutView.getMeasuredHeight());
+
+            int deviceWindowHeight = ScaleFactorCaculator.getDeviceWindowHeight(windowHeight,
+                    mEditProfileLayoutView.getMeasuredWidth(),
+                    mEditProfileLayoutView.getMeasuredHeight());
+
+            View child = inflater.inflate(R.layout.camera_grid_item, mEditProfileLayoutView, false);
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(deviceWindowWidth, deviceWindowHeight);
+            layoutParams.leftMargin = deviceWindowLeft;
+            layoutParams.topMargin = deviceWindowHeight;
+            ImageView imageView = (ImageView)child.findViewById(R.id.camera_view);
+            imageView.setImageResource(R.drawable.sample_0);
+
+            mEditProfileLayoutView.addView(child, layoutParams);
+
+            imageUpdater.subscribe(windowInfo.inputIndex, imageView);
+            ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
+                    (short)480, (short)270, new byte[]{(byte) windowInfo.inputIndex});
+        }
+    }
+
+    CommandListener commandListener = new CommandListener() {
+        @Override
+        public void onSentCommand(Command cmd) {
+            Log.i(TAG, "onSentCommand:" + cmd.command);
+        }
+
+        @Override
+        public void onReceivedCommand(Command cmd) {
+            Log.i(TAG, "onReceivedCommand:" + cmd);
+            if(cmd instanceof GetPlanWindowListResponse) {
+
+                GetPlanWindowListResponse r = (GetPlanWindowListResponse) cmd;
+                Log.i(TAG, "GetPlanWindowListResponse list sg window count:" + r.windowCount);
+                WindowInfoModel.getInstance().windowInfos = r.windowInfos;
+
+
+                Message message = new Message();
+                message.what = MSG_ON_GET_PLAN_WINDOW_LIST;
+
+                message.obj = r.windowInfos;
+
+                mHandler.sendMessage(message);
+
+                for (WindowInfo ws : r.windowInfos) {
+                    Log.i(TAG, "get plan window list sg:" + ws);
+                }
+
+//                ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
+//                        (short)480, (short)270, new byte[]{0x00});
+            }
+        }
+    };
+
 
     public ViewProfileFragment() {
         // Required empty public constructor
@@ -74,27 +194,23 @@ public class ViewProfileFragment extends Fragment {
             mEnableAnimation = getArguments().getBoolean(ENABLE_ANIMATION, false);
             mProfileId = getArguments().getInt(PROFILE_ID, 0);
         }
+
+        ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+        con.addCommandListener(commandListener);
+        {
+            Request req = RequestFactory.createGetPlanWindowListRequest();
+            con.sendCommand(req);
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mRootView = null;
-        if (!mEnableAnimation) {
-            mRootView = inflater.inflate(R.layout.fragment_view_profile_default, container, false);
 
-            gridview = (GridView) mRootView.findViewById(R.id.grid_view);
+        mRootView = inflater.inflate(R.layout.fragment_view_profile_default, container, false);
 
-            mImageAdapter = new ChosenProfileImageAdapter(mRootView.getContext());
-            gridview.setAdapter(mImageAdapter);
-        } else {
-            mRootView = inflater.inflate(R.layout.fragment_view_profile, container, false);
-            mEditProfileLayoutView = (RelativeLayout) mRootView.findViewById(R.id.camera_container);
-            if (mProfileId == 0) {
-                createProfileLayout();
-            }
-        }
+        mEditProfileLayoutView = (FreeProfileLayoutView) mRootView.findViewById(R.id.camera_container);
 
         mTextView = (TextView) mRootView.findViewById(R.id.title_view);
 
@@ -107,21 +223,41 @@ public class ViewProfileFragment extends Fragment {
         }
 
         if (savedInstanceState == null) {
-            if (mEnableAnimation) {
+            //if (mEnableAnimation) {
                 mRootView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                     @Override
                     public boolean onPreDraw() {
                         mRootView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        runEnterAnimation();
+                        if (mEnableAnimation) {
+                            runEnterAnimation();
+                        }
+
+                        ScreenGroup screenGroup = ScreenStructure.getInstance().screenGroups[0];
+
+                        float screenWidth = screenGroup.horizontalCount * 1920.0f;
+                        float screenHeight = screenGroup.verticalCount * 1080.0f;
+
+                        boolean isLandScape = screenWidth > screenHeight ? true : false;
+
+                        mEditProfileLayoutView.setHScreenCount(screenGroup.horizontalCount);
+                        mEditProfileLayoutView.setVScreenCount(screenGroup.verticalCount);
+
+                        //if (isLandScape) {
+                        int height = mEditProfileLayoutView.getMeasuredHeight();
+                        Log.d(TAG, "editProfileLayoutHeight: " + height);
+                        int width = (int) (height * ( screenWidth / screenHeight ));
+                        ViewGroup.LayoutParams layoutParams = mEditProfileLayoutView.getLayoutParams();
+                        layoutParams.width = width;
+                        mEditProfileLayoutView.setLayoutParams(layoutParams);
                         return true;
                     }
                 });
-            }
+            //}
         }
 
         return mRootView;
     }
-
+/*
     private void createProfileLayout() {
         ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -145,7 +281,7 @@ public class ViewProfileFragment extends Fragment {
             mEditProfileLayoutView.addView(child, layoutParams);
         }
     }
-
+*/
     private void runEnterAnimation() {
         if (getArguments() != null) {
             Log.e(TAG, "runEnterAnimation...........");
@@ -185,17 +321,17 @@ public class ViewProfileFragment extends Fragment {
         }
     }
 
-    public void performUpdateProfileModel() {
-        if (!mEnableAnimation) {
-            for (int i = 0; i < gridview.getChildCount(); i++) {
-                View view = gridview.getChildAt(i);
-                int[] screenLocation = new int[2];
-                view.getLocationOnScreen(screenLocation);
-                CameraInfo cameraInfo = new CameraInfo(view.getTop(), view.getLeft(), view.getWidth(), view.getHeight(), i, mImageAdapter.mThumbIds[i]);
-                EditProfileModel.getInstance().addCameraInfo(cameraInfo);
-            }
-        }
-    }
+//    public void performUpdateProfileModel() {
+//        if (!mEnableAnimation) {
+//            for (int i = 0; i < gridview.getChildCount(); i++) {
+//                View view = gridview.getChildAt(i);
+//                int[] screenLocation = new int[2];
+//                view.getLocationOnScreen(screenLocation);
+//                CameraInfo cameraInfo = new CameraInfo(view.getTop(), view.getLeft(), view.getWidth(), view.getHeight(), i, mImageAdapter.mThumbIds[i]);
+//                EditProfileModel.getInstance().addCameraInfo(cameraInfo);
+//            }
+//        }
+//    }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

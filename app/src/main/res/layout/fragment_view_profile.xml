@@ -17,6 +17,7 @@
         />
 
     <View
+        android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:layout_marginLeft="16dp"
@@ -24,14 +25,38 @@
         android:layout_below="@+id/title_view"
         android:background="@android:color/white"/>
 
-    <RelativeLayout
-        android:id="@+id/camera_container"
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/camera_container"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_marginTop="24dp"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--android:layout_marginLeft="16dp"-->
+        <!--android:layout_marginRight="16dp"-->
+        <!--android:layout_below="@+id/title_view"/>-->
+    <HorizontalScrollView
+        android:id="@+id/ScrollView01"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="8dp"
+        android:layout_below="@+id/divider"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_below="@+id/title_view"/>
-
+        android:layout_marginBottom="8dp"
+        android:layout_centerHorizontal="true"
+        android:fillViewport="true"
+        android:scrollbars="none" >
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:gravity="center"
+            android:descendantFocusability="beforeDescendants">
+            <com.argonmobile.odinapp.view.FreeProfileLayoutView
+                android:id="@+id/camera_container"
+                android:layout_width="800dp"
+                android:layout_height="match_parent">
+            </com.argonmobile.odinapp.view.FreeProfileLayoutView>
+        </LinearLayout>
+    </HorizontalScrollView>
 </RelativeLayout>

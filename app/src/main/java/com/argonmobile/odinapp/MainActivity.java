@@ -9,8 +9,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.argonmobile.odinapp.model.ScreenStructure;
 import com.argonmobile.odinapp.model.WindowInfoModel;
-import com.argonmobile.odinapp.model.WindowStructure;
 import com.argonmobile.odinapp.protocol.command.Command;
 import com.argonmobile.odinapp.protocol.command.GetOutputInfoResponse;
 import com.argonmobile.odinapp.protocol.command.GetPlanListResponse;
@@ -94,7 +94,6 @@ public class MainActivity extends ActionBarActivity {
         }*/
     }
 
-
     CommandListener commandListener = new CommandListener() {
         @Override
         public void onSentCommand(Command cmd) {
@@ -106,7 +105,7 @@ public class MainActivity extends ActionBarActivity {
             Log.i(TAG, "onReceivedCommand:" + cmd);
             if (cmd instanceof GetWindowStructureResponse) {
                 GetWindowStructureResponse r = (GetWindowStructureResponse) cmd;
-                WindowStructure.getInstance().screenGroups = r.screenGroups;
+                ScreenStructure.getInstance().screenGroups = r.screenGroups;
                 for (ScreenGroup sg : r.screenGroups) {
                     Log.i(TAG, "get window structure, sg:" + sg);
                 }

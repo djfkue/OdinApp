@@ -65,10 +65,11 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
                 if (mScaleFactor < 0.7f) {
                     Intent intent = new Intent(ChosenProfileActivity.this, FindCameraActivity.class);
                     startActivity(intent);
+                    finish();
                 } else if (mScaleFactor < 1) {
                     mViewProfileFragment.getView().animate().scaleX(1).scaleY(1).withLayer();
                 } else if (mScaleFactor > 1.1f) {
-                    mViewProfileFragment.performUpdateProfileModel();
+//                    mViewProfileFragment.performUpdateProfileModel();
                     Intent intent = new Intent(ChosenProfileActivity.this, EditProfileActivity.class);
                     startActivity(intent);
                     overridePendingTransition(R.anim.fadein, R.anim.fadeout);
