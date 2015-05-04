@@ -11,9 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.argonmobile.odinapp.cardsui.objects.CardStack;
-import com.argonmobile.odinapp.cardsui.views.CardUI;
-import com.argonmobile.odinapp.dummy.MyImageCard;
 import com.argonmobile.odinapp.model.Profile;
 import com.argonmobile.odinapp.model.ProfileStack;
 import com.argonmobile.odinapp.util.ReferenceCountedTrigger;
