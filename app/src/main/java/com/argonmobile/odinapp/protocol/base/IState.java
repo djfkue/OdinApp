@@ -1,4 +1,4 @@
-package com.argonmobile.odinapp.protocol.connection;
+package com.argonmobile.odinapp.protocol.base;
 
 /**
  * Created by sean on 4/17/15.

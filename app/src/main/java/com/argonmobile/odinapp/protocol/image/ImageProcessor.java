@@ -6,10 +6,10 @@ import android.os.Handler;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.argonmobile.odinapp.protocol.base.IState;
 import com.argonmobile.odinapp.protocol.command.Command;
 import com.argonmobile.odinapp.protocol.command.JpgResponse;
 import com.argonmobile.odinapp.protocol.connection.CommandListener;
-import com.argonmobile.odinapp.protocol.connection.IState;
 
 import java.util.ArrayList;
 import java.util.Collections;

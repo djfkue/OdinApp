@@ -1,5 +1,7 @@
 package com.argonmobile.odinapp.protocol.connection;
 
+import com.argonmobile.odinapp.protocol.base.IState;
+
 import java.util.ArrayList;
 
 

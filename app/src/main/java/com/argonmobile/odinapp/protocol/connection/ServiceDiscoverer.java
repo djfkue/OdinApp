@@ -3,6 +3,7 @@ package com.argonmobile.odinapp.protocol.connection;
 import android.content.Context;
 import android.util.Log;
 
+import com.argonmobile.odinapp.protocol.base.IState;
 import com.argonmobile.odinapp.protocol.command.Request;
 import com.argonmobile.odinapp.protocol.command.RequestFactory;
 import com.argonmobile.odinapp.protocol.command.ResponseParser;
