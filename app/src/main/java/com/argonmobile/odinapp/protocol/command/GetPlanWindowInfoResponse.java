@@ -1,10 +1,8 @@
 package com.argonmobile.odinapp.protocol.command;
 
-import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
-import com.argonmobile.odinapp.protocol.deviceinfo.WindowStructure;
+import com.argonmobile.odinapp.protocol.deviceinfo.WindowInfo;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +15,7 @@ public class GetPlanWindowInfoResponse extends Response {
     public int windowCount;
     public int planIndex;
     public boolean isChanged;
-    public List<WindowStructure> windowStructures;
+    public List<WindowInfo> windowInfos;
 
     private GetPlanWindowInfoResponse() {}
 
@@ -33,12 +31,12 @@ public class GetPlanWindowInfoResponse extends Response {
             GetPlanWindowInfoResponse firstResponse = (GetPlanWindowInfoResponse)subResponses.get(0);
             if(firstResponse.totalCount > subResponses.size()) return null;
 
-            List<WindowStructure> screenGroups = new ArrayList<WindowStructure>();
+            List<WindowInfo> screenGroups = new ArrayList<WindowInfo>();
             for(Response r : subResponses) {
                 GetPlanWindowInfoResponse sr = (GetPlanWindowInfoResponse) r;
-                screenGroups.addAll(sr.windowStructures);
+                screenGroups.addAll(sr.windowInfos);
             }
-            firstResponse.windowStructures = screenGroups;
+            firstResponse.windowInfos = screenGroups;
             return firstResponse;
         }
         @Override
@@ -55,12 +53,12 @@ public class GetPlanWindowInfoResponse extends Response {
         planIndex = byteBuffer.get();
         isChanged = (byteBuffer.get() == 0x01);
 
-        windowStructures = new ArrayList<WindowStructure>();
+        windowInfos = new ArrayList<WindowInfo>();
         int remainPayloadLength = payloadLength - 5;
         while(remainPayloadLength > 0) {
-            WindowStructure ws = new WindowStructure();
+            WindowInfo ws = new WindowInfo();
             remainPayloadLength -= ws.load(byteBuffer);
-            windowStructures.add(ws);
+            windowInfos.add(ws);
         }
     }
 }

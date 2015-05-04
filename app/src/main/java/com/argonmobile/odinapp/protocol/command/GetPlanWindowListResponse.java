@@ -1,6 +1,6 @@
 package com.argonmobile.odinapp.protocol.command;
 
-import com.argonmobile.odinapp.protocol.deviceinfo.WindowStructure;
+import com.argonmobile.odinapp.protocol.deviceinfo.WindowInfo;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public class GetPlanWindowListResponse extends Response {
     public int totalCount;
     public int index;
     public int windowCount;
-    public List<WindowStructure> windowStructures;
+    public List<WindowInfo> windowInfos;
 
     private GetPlanWindowListResponse() {}
 
@@ -29,12 +29,12 @@ public class GetPlanWindowListResponse extends Response {
             GetPlanWindowListResponse firstResponse = (GetPlanWindowListResponse)subResponses.get(0);
             if(firstResponse.totalCount > subResponses.size()) return null;
 
-            List<WindowStructure> windowStructures = new ArrayList<WindowStructure>();
+            List<WindowInfo> windowStructures = new ArrayList<WindowInfo>();
             for(Response r : subResponses) {
                 GetPlanWindowListResponse sr = (GetPlanWindowListResponse) r;
-                windowStructures.addAll(sr.windowStructures);
+                windowStructures.addAll(sr.windowInfos);
             }
-            firstResponse.windowStructures = windowStructures;
+            firstResponse.windowInfos = windowStructures;
             return firstResponse;
         }
         @Override
@@ -49,12 +49,12 @@ public class GetPlanWindowListResponse extends Response {
         index = byteBuffer.get();
         windowCount = byteBuffer.get();
 
-        windowStructures = new ArrayList<WindowStructure>();
+        windowInfos = new ArrayList<WindowInfo>();
         int remainPayloadLength = payloadLength - 3;
         while(remainPayloadLength > 0) {
-            WindowStructure ws = new WindowStructure();
+            WindowInfo ws = new WindowInfo();
             remainPayloadLength -= ws.load(byteBuffer);
-            windowStructures.add(ws);
+            windowInfos.add(ws);
         }
     }
 }

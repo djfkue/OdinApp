@@ -8,11 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 
 import com.argonmobile.odinapp.model.WindowStructure;
 import com.argonmobile.odinapp.protocol.command.Command;
-import com.argonmobile.odinapp.protocol.command.GetInputInfoResponse;
 import com.argonmobile.odinapp.protocol.command.GetOutputInfoResponse;
 import com.argonmobile.odinapp.protocol.command.GetPlanListResponse;
 import com.argonmobile.odinapp.protocol.command.GetPlanWindowInfoResponse;
@@ -23,11 +21,10 @@ import com.argonmobile.odinapp.protocol.command.RequestFactory;
 import com.argonmobile.odinapp.protocol.connection.CommandListener;
 import com.argonmobile.odinapp.protocol.connection.ConnectionManager;
 import com.argonmobile.odinapp.protocol.connection.ControlConnection;
-import com.argonmobile.odinapp.protocol.deviceinfo.InputInfo;
 import com.argonmobile.odinapp.protocol.deviceinfo.OutputInfo;
 import com.argonmobile.odinapp.protocol.deviceinfo.PlanInfo;
 import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
-import com.argonmobile.odinapp.protocol.image.ImageUpdater;
+import com.argonmobile.odinapp.protocol.deviceinfo.WindowInfo;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -131,8 +128,8 @@ public class MainActivity extends ActionBarActivity {
             } else if(cmd instanceof GetPlanWindowListResponse) {
                 GetPlanWindowListResponse r = (GetPlanWindowListResponse) cmd;
                 Log.i(TAG, "GetPlanWindowListResponse list sg window count:" + r.windowCount);
-                for (ScreenGroup sg : r.screenGroups) {
-                    Log.i(TAG, "get plan window list sg:" + sg);
+                for (WindowInfo ws : r.windowInfos) {
+                    Log.i(TAG, "get plan window list sg:" + ws);
                 }
             } else if(cmd instanceof GetOutputInfoResponse) {
                 GetOutputInfoResponse r =(GetOutputInfoResponse)cmd;
@@ -141,8 +138,8 @@ public class MainActivity extends ActionBarActivity {
                 }
             } else if(cmd instanceof GetPlanWindowInfoResponse) {
                 GetPlanWindowInfoResponse r = (GetPlanWindowInfoResponse) cmd;
-                for (ScreenGroup sg : r.screenGroups) {
-                    Log.i(TAG, "get plan window info sg:" + sg);
+                for (WindowInfo ws : r.windowInfos) {
+                    Log.i(TAG, "get plan window info sg:" + ws);
                 }
             }
         }

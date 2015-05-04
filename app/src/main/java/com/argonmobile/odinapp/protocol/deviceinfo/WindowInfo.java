@@ -6,7 +6,7 @@ import java.nio.charset.Charset;
 /**
  * Created by sean on 5/4/15.
  */
-public class WindowStructure {
+public class WindowInfo {
     public short windowId;
     public short inputIndex;
     public short userZOrder;
