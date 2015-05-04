@@ -1,6 +1,7 @@
 package com.argonmobile.odinapp.protocol.command;
 
 import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
+import com.argonmobile.odinapp.protocol.deviceinfo.WindowStructure;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -16,7 +17,7 @@ public class GetPlanWindowInfoResponse extends Response {
     public int windowCount;
     public int planIndex;
     public boolean isChanged;
-    public List<ScreenGroup> screenGroups;
+    public List<WindowStructure> windowStructures;
 
     private GetPlanWindowInfoResponse() {}
 
@@ -32,12 +33,12 @@ public class GetPlanWindowInfoResponse extends Response {
             GetPlanWindowInfoResponse firstResponse = (GetPlanWindowInfoResponse)subResponses.get(0);
             if(firstResponse.totalCount > subResponses.size()) return null;
 
-            List<ScreenGroup> screenGroups = new ArrayList<ScreenGroup>();
+            List<WindowStructure> screenGroups = new ArrayList<WindowStructure>();
             for(Response r : subResponses) {
                 GetPlanWindowInfoResponse sr = (GetPlanWindowInfoResponse) r;
-                screenGroups.addAll(sr.screenGroups);
+                screenGroups.addAll(sr.windowStructures);
             }
-            firstResponse.screenGroups = screenGroups;
+            firstResponse.windowStructures = screenGroups;
             return firstResponse;
         }
         @Override
@@ -54,28 +55,12 @@ public class GetPlanWindowInfoResponse extends Response {
         planIndex = byteBuffer.get();
         isChanged = (byteBuffer.get() == 0x01);
 
-        screenGroups = new ArrayList<ScreenGroup>();
-        int screenGroupLength = payloadLength - 5;
-        while(screenGroupLength > 0) {
-            ScreenGroup sg = new ScreenGroup();
-            sg.horizontalCount = byteBuffer.get();
-            sg.verticalCount = byteBuffer.get();
-            sg.startNumber = byteBuffer.get();
-            // get description
-            // TODO: make sure the description is no longer than 256 bytes
-            byte[] descriptionBuffer = new byte[256];
-            byte singleChar;
-            int charIndex = 0;
-            do {
-                singleChar = byteBuffer.get();
-                if(singleChar != '\0')
-                    descriptionBuffer[charIndex++] = singleChar;
-                else
-                    break;
-            } while(true);
-            sg.description = new String(descriptionBuffer, 0, charIndex, Charset.forName("UTF-8"));
-            screenGroupLength -= (3 + charIndex);
-            screenGroups.add(sg);
+        windowStructures = new ArrayList<WindowStructure>();
+        int remainPayloadLength = payloadLength - 5;
+        while(remainPayloadLength > 0) {
+            WindowStructure ws = new WindowStructure();
+            remainPayloadLength -= ws.load(byteBuffer);
+            windowStructures.add(ws);
         }
     }
 }
