@@ -3,6 +3,7 @@ package com.argonmobile.odinapp;
 import android.animation.TimeInterpolator;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -134,6 +135,13 @@ public class ViewProfileFragment extends Fragment {
             layoutParams.topMargin = cameraInfo.getTop();
             ImageView imageView = (ImageView)child.findViewById(R.id.camera_view);
             imageView.setImageResource(cameraInfo.getBitmap());
+            child.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), ControlInputActivity.class);
+                    startActivity(intent);
+                }
+            });
             mEditProfileLayoutView.addView(child, layoutParams);
         }
     }

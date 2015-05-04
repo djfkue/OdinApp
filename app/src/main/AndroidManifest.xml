@@ -31,6 +31,7 @@
             android:label="@string/title_activity_find_camera"
             android:noHistory="true"
             android:screenOrientation="landscape" >
+
         </activity>
         <activity
             android:name=".EditProfileActivity"
@@ -50,6 +51,7 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:screenOrientation="landscape">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

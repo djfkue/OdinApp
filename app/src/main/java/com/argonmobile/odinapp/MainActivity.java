@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.argonmobile.odinapp.model.WindowInfoModel;
 import com.argonmobile.odinapp.model.WindowStructure;
 import com.argonmobile.odinapp.protocol.command.Command;
 import com.argonmobile.odinapp.protocol.command.GetOutputInfoResponse;
@@ -128,6 +129,7 @@ public class MainActivity extends ActionBarActivity {
             } else if(cmd instanceof GetPlanWindowListResponse) {
                 GetPlanWindowListResponse r = (GetPlanWindowListResponse) cmd;
                 Log.i(TAG, "GetPlanWindowListResponse list sg window count:" + r.windowCount);
+                WindowInfoModel.getInstance().windowInfos = r.windowInfos;
                 for (WindowInfo ws : r.windowInfos) {
                     Log.i(TAG, "get plan window list sg:" + ws);
                 }

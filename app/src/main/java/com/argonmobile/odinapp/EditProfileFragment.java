@@ -90,7 +90,7 @@ public class EditProfileFragment extends Fragment {
 
                     ScreenGroup screenGroup = WindowStructure.getInstance().screenGroups[0];
 
-                    float screenWidth = 2 * screenGroup.horizontalCount * 1920.0f;
+                    float screenWidth = screenGroup.horizontalCount * 1920.0f;
                     float screenHeight = screenGroup.verticalCount * 1080.0f;
 
                     boolean isLandScape = screenWidth > screenHeight ? true : false;

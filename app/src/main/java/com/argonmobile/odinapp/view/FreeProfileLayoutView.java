@@ -1,10 +1,12 @@
 package com.argonmobile.odinapp.view;
 
+import android.animation.ObjectAnimator;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -31,6 +33,7 @@ public class FreeProfileLayoutView extends RelativeLayout {
     private int mHScreenCount = 1;
 
     private Paint mRectPaint;
+    private Paint mInnerCellPaint;
 
     public FreeProfileLayoutView(Context context) {
         super(context);
@@ -41,8 +44,15 @@ public class FreeProfileLayoutView extends RelativeLayout {
         mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
         mScaleGestureDetector.setQuickScaleEnabled(true);
         mRectPaint = new Paint();
+        mRectPaint.setStyle(Paint.Style.STROKE);
         mRectPaint.setColor(Color.WHITE);
-        mRectPaint.setStrokeWidth(3.0f);
+        mRectPaint.setStrokeWidth(5.0f);
+
+        mInnerCellPaint = new Paint();
+        mInnerCellPaint.setStyle(Paint.Style.STROKE);
+        mInnerCellPaint.setPathEffect(new DashPathEffect(new float[] {5,20}, 10));
+        mInnerCellPaint.setColor(Color.BLUE);
+        mInnerCellPaint.setStrokeWidth(2.0f);
     }
 
     public FreeProfileLayoutView(Context context, AttributeSet attrs, int defStyle) {
@@ -61,7 +71,37 @@ public class FreeProfileLayoutView extends RelativeLayout {
 
     @Override
     protected void onDraw (Canvas canvas) {
+
+    }
+
+    @Override
+    protected void dispatchDraw (Canvas canvas) {
+        drawCells(canvas);
+        super.dispatchDraw(canvas);
+    }
+
+    private void drawCells(Canvas canvas) {
         canvas.drawRect(getLeft(), getTop(), getRight(), getBottom(), mRectPaint);
+
+        for (int i = 0; i < mHScreenCount * 2; i++) {
+            int startX = i * getWidth() / mHScreenCount / 2;
+            canvas.drawLine(startX, getTop(), startX, getBottom(), mInnerCellPaint);
+        }
+
+        for (int i = 0; i < mVScreenCount * 2; i++) {
+            int startY = i * getHeight() / mVScreenCount / 2;
+            canvas.drawLine(getLeft(), startY, getRight(), startY, mInnerCellPaint);
+        }
+
+        for (int i = 0; i < mHScreenCount; i++) {
+            int startX = i * getWidth() / mHScreenCount;
+            canvas.drawLine(startX, getTop(), startX, getBottom(), mRectPaint);
+        }
+
+        for(int i = 0; i < mVScreenCount; i++) {
+            int startY = i * getHeight() / mVScreenCount;
+            canvas.drawLine(getLeft(), startY, getRight(), startY, mRectPaint);
+        }
     }
 
     @Override
@@ -256,6 +296,47 @@ public class FreeProfileLayoutView extends RelativeLayout {
             mCheckedView.setScaleY(1);
 
             mCheckedView.setLayoutParams(layoutParams);
+
+            int mDestLeft = 0;
+            int cellWidth = getWidth() / mHScreenCount / 2;
+            int cellHeight = getHeight() / mVScreenCount / 2;
+            if (mCheckedView.getX() < 0) {
+                mDestLeft = 0;
+            } else {
+                mDestLeft = (int) ((mCheckedView.getX() / cellWidth)) * cellWidth;
+            }
+
+            int mDestRight = 0;
+            if ((rect.left + rect.width()) > getWidth()) {
+                mDestRight = getWidth();
+            } else {
+                mDestRight = ((int) ((rect.left + rect.width()) / cellWidth) + 1) * cellWidth;
+            }
+
+            int destTop = 0;
+            if (rect.top < 0) {
+                destTop = 0;
+            } else {
+                destTop = (rect.top / cellHeight) * cellHeight;
+            }
+
+            int destBottom = 0;
+            if (rect.bottom > getHeight()) {
+                destBottom = getHeight();
+            } else {
+                destBottom = ((rect.bottom / cellHeight) + 1) * cellHeight;
+            }
+
+            layoutParams = (LayoutParams) mCheckedView.getLayoutParams();
+            layoutParams.width = mDestRight - mDestLeft;
+            layoutParams.height = destBottom - destTop;
+
+            mCheckedView.setLayoutParams(layoutParams);
+
+            Log.d(TAG, "checked view x: " + mDestLeft);
+            mCheckedView.setX(mDestLeft);
+            mCheckedView.setY(destTop);
+
         }
     }
 }
