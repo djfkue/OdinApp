@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.argonmobile.odinapp.SearchCameraFragment"
-    android:background="#111320">
+    android:background="@drawable/camera_search_bg">
     <View
         android:id="@+id/search_tap_view"
         android:layout_width="match_parent"
