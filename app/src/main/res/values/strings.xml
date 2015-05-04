@@ -15,5 +15,6 @@
     <string name="title_activity_edit_profile">EditProfileActivity</string>
     <string name="title_activity_temp_chosen_profile">TempChosenProfileActivity</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_control_input">ControlInputActivity</string>
 
 </resources>
