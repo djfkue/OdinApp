@@ -10,7 +10,7 @@ public class WindowInfo {
     public short windowId;
     public short inputIndex;
     public short userZOrder;
-    public short input;
+    public byte input;
     public byte divideMode;
     public short[] subInputs;
     public String url;
@@ -29,7 +29,7 @@ public class WindowInfo {
         windowId = bb.getShort();
         inputIndex = bb.getShort();
         userZOrder = bb.getShort();
-        input = bb.getShort();
+        input = bb.get();
         divideMode = bb.get();
 
         int subInputCount = divideMode & 0x000000FF;
@@ -62,15 +62,16 @@ public class WindowInfo {
         leftTop = bb.getShort();
         rightBottom = bb.getShort();
 
+        /*
         isWindowFixed = (bb.get() == (byte)0x01);
         recycleInterval = bb.getInt();
         recycleListCount = bb.getShort();
         recycleIndexes = new short[recycleListCount];
         for(int index = 0; index < recycleListCount; ++index) {
             recycleIndexes[index] = bb.getShort();
-        }
+        }*/
 
-        readLength += 30 + (subInputs.length + recycleIndexes.length) * 2 + readCount;
+        readLength += 22 + subInputs.length * 2 + readCount;
         return readLength;
     }
 }

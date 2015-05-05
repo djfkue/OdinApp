@@ -62,6 +62,7 @@ public class MainActivity extends ActionBarActivity {
             con.sendCommand(req);
         }
 
+/*
         { // test get input info
             Request req = RequestFactory.createGetInputInfoRequest();
             con.sendCommand(req);
@@ -81,11 +82,12 @@ public class MainActivity extends ActionBarActivity {
             Request req = RequestFactory.createGetPlanWindowListRequest();
             con.sendCommand(req);
         }
-
+*/
+        /*
         { // 获得预案窗口信息
             Request req = RequestFactory.createGetPlanWindowInfoRequest();
             con.sendCommand(req);
-        }
+        }*/
         /*
         {
             Request req = RequestFactory.createJpgRequest(CommandDefs.PARAM_SIGNAL_IMAGE, true,

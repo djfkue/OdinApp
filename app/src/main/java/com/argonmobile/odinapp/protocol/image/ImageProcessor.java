@@ -48,7 +48,7 @@ public class ImageProcessor extends IState implements CommandListener {
             Log.i(TAG, "before decode bitmap");
             long start = System.currentTimeMillis();
             BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.RGB_565;
+            //options.inPreferredConfig = Bitmap.Config.RGB_565;
             Bitmap bitmap = BitmapFactory.decodeByteArray(packet.imageData, 0, packet.imageData.length, options);
             Log.i(TAG, "after decode bitmap, cost:" + (System.currentTimeMillis() - start) + "ms");
             handler.sendMessage(handler.obtainMessage(MSG_ON_REC_IMAGE, packet.imageOrPlanIndex, 0, bitmap));
@@ -84,17 +84,22 @@ public class ImageProcessor extends IState implements CommandListener {
         if(cmd instanceof JpgResponse) {
             JpgResponse response = (JpgResponse) cmd;
             int key = getKeyFromJpgResponse(response);
-            Log.i(TAG, "onReceivedCommand key:" + key);
+            Log.i(TAG, "onReceivedCommand key:" + key +
+                    ", index:" + response.planIndex + ", type:" + response.imageType +
+                    ", response:" + response.index + ", response.totalCount" + response.totalCount);
+            if(response.index >= response.totalCount) return;
             ArrayList<JpgResponse> responses = responseArrays.get(key);
             if(responses == null) {
                 responses = new ArrayList<JpgResponse>();
             }
             responses.add(response);
             responseArrays.put(key, responses);
+            Log.i(TAG, "after put rarraysize:" + responseArrays.size());
 
             if(response.totalCount == responses.size()) {
                 packImage(responses);
                 responseArrays.removeAt(key);
+                Log.i(TAG, "after remove ----> array size:" + responseArrays.size());
             }
         }
     }
@@ -120,7 +125,7 @@ public class ImageProcessor extends IState implements CommandListener {
         packet.imageType = responses.get(0).imageType;
         packet.imageOrPlanIndex = responses.get(0).planIndex;
         packet.imageData = new byte[jpgDataLength];
-        Log.i(TAG, "jpgDataLength:" + jpgDataLength);
+        Log.i(TAG, "responses size:" + responses.size() + ", jpgDataLength:" + jpgDataLength);
         int pos = 0;
         for(JpgResponse response: responses) {
             Log.i(TAG, "totalCount:" + response.totalCount + "response.index:" + response.index);
@@ -137,7 +142,7 @@ public class ImageProcessor extends IState implements CommandListener {
     private int getKeyFromJpgResponse(JpgResponse response) {
         if(response == null) throw new IllegalArgumentException("Response should not be null");
         // make key image type(0x01 or 0x00) * 56636 + plan index or signal index
-        return (response.imageType & 0x000000FF) << 16 + response.planIndex;
+        return ((response.imageType & 0x000000FF) << 16) + response.planIndex;
     }
 
     private static int compare(int lhs, int rhs) {

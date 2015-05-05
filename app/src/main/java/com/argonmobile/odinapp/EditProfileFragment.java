@@ -28,7 +28,11 @@ import com.argonmobile.odinapp.dummy.EditProfileCameraAdapter;
 import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
 import com.argonmobile.odinapp.model.ScreenStructure;
+import com.argonmobile.odinapp.protocol.connection.ConnectionManager;
+import com.argonmobile.odinapp.protocol.deviceinfo.InputInfo;
 import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
+import com.argonmobile.odinapp.protocol.image.ImageUpdater;
+import com.argonmobile.odinapp.util.MockSwitch;
 import com.argonmobile.odinapp.view.CheckedFrameLayout;
 import com.argonmobile.odinapp.view.FreeProfileLayoutView;
 import com.argonmobile.odinapp.view.ShadowLayout;
@@ -54,6 +58,8 @@ public class EditProfileFragment extends Fragment {
     private TextView mTextView;
     private FreeProfileLayoutView mEditProfileLayoutView;
     private CheckedFrameLayout mCurrentChecked;
+
+    private ImageUpdater imageUpdater = new ImageUpdater();
 
     public EditProfileFragment() {
         // Required empty public constructor
@@ -83,26 +89,43 @@ public class EditProfileFragment extends Fragment {
 
                     runEnterAnimation();
 
-                    ScreenGroup screenGroup = ScreenStructure.getInstance().screenGroups[0];
+                    if (!MockSwitch.MOCK_SWITCH_ON) {
+                        ScreenGroup screenGroup = ScreenStructure.getInstance().screenGroups[0];
 
-                    float screenWidth = screenGroup.horizontalCount * 1920.0f;
-                    float screenHeight = screenGroup.verticalCount * 1080.0f;
+                        float screenWidth = screenGroup.horizontalCount * 1920.0f;
+                        float screenHeight = screenGroup.verticalCount * 1080.0f;
 
-                    boolean isLandScape = screenWidth > screenHeight ? true : false;
+                        boolean isLandScape = screenWidth > screenHeight ? true : false;
 
-                    mEditProfileLayoutView.setVScreenCount(screenGroup.verticalCount);
-                    mEditProfileLayoutView.setHScreenCount(screenGroup.horizontalCount);
+                        mEditProfileLayoutView.setVScreenCount(screenGroup.verticalCount);
+                        mEditProfileLayoutView.setHScreenCount(screenGroup.horizontalCount);
 
-                    //if (isLandScape) {
-                    int height = mEditProfileLayoutView.getMeasuredHeight();
-                    Log.d(TAG, "editProfileLayoutHeight: " + height);
-                    int width = (int) (height * ( screenWidth / screenHeight ));
-                    ViewGroup.LayoutParams layoutParams = mEditProfileLayoutView.getLayoutParams();
-                    layoutParams.width = width;
-                    mEditProfileLayoutView.setLayoutParams(layoutParams);
-                    //mEditProfileLayoutView.setBackgroundColor(Color.BLUE);
-                    //}
+                        //if (isLandScape) {
+                        int height = mEditProfileLayoutView.getMeasuredHeight();
+                        Log.d(TAG, "editProfileLayoutHeight: " + height);
+                        int width = (int) (height * (screenWidth / screenHeight));
+                        ViewGroup.LayoutParams layoutParams = mEditProfileLayoutView.getLayoutParams();
+                        layoutParams.width = width;
+                        mEditProfileLayoutView.setLayoutParams(layoutParams);
 
+                    } else {
+                        float screenWidth = 3 * 1920.0f;
+                        float screenHeight = 3 * 1080.0f;
+
+                        boolean isLandScape = screenWidth > screenHeight ? true : false;
+
+                        mEditProfileLayoutView.setVScreenCount(3);
+                        mEditProfileLayoutView.setHScreenCount(3);
+
+                        //if (isLandScape) {
+                        int height = mEditProfileLayoutView.getMeasuredHeight();
+                        Log.d(TAG, "editProfileLayoutHeight: " + height);
+                        int width = (int) (height * (screenWidth / screenHeight));
+                        ViewGroup.LayoutParams layoutParams = mEditProfileLayoutView.getLayoutParams();
+                        layoutParams.width = width;
+                        mEditProfileLayoutView.setLayoutParams(layoutParams);
+
+                    }
                     return true;
                 }
             });
@@ -134,6 +157,16 @@ public class EditProfileFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onStop () {
+        super.onStop();
+
+        ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
+        for (CameraInfo cameraInfo : cameraInfos) {
+            ConnectionManager.defaultManager.stopJpgTransport(new byte[]{(byte) cameraInfo.getId()});
+        }
+    }
+
     private void runEnterAnimation() {
         Log.e(TAG, "gridview child count: " + mGridView.getChildCount());
 
@@ -141,8 +174,6 @@ public class EditProfileFragment extends Fragment {
 
         for (int i = 0; i < mGridView.getChildCount(); i++) {
             View cameraView = mGridView.getChildAt(i);
-
-            ShadowLayout shadowLayout = (ShadowLayout) cameraView.findViewById(R.id.shadowLayout);
 
             int[] screenLocation = new int[2];
             cameraView.getLocationOnScreen(screenLocation);
@@ -231,7 +262,14 @@ public class EditProfileFragment extends Fragment {
             layoutParams.topMargin = cameraInfo.getTop();
             ImageView imageView = (ImageView)child.findViewById(R.id.camera_view);
             imageView.setImageResource(cameraInfo.getBitmap());
+            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+
             mEditProfileLayoutView.addView(child, layoutParams);
+
+            imageUpdater.subscribe(cameraInfo.getId(), imageView);
+            ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
+                    (short)480, (short)270, new byte[]{(byte) cameraInfo.getId()});
+
             final CheckedFrameLayout checkedFrameLayout = (CheckedFrameLayout) child.findViewById(R.id.checked_frame);
 
             checkedFrameLayout.setOnDragListener(mCameraDragListener);
@@ -262,7 +300,7 @@ public class EditProfileFragment extends Fragment {
                         mCurrentChecked = checkedView;
                         Log.e(TAG, "current checked: " +mCurrentChecked.toString());
 
-                        final ScaleGestureDetector scaleGestureDetector = new ScaleGestureDetector(getActivity(), new ScaleListener(mCurrentChecked));
+//                        final ScaleGestureDetector scaleGestureDetector = new ScaleGestureDetector(getActivity(), new ScaleListener(mCurrentChecked));
 
 //                        mCurrentChecked.setOnTouchListener(new View.OnTouchListener() {
 //                            @Override

@@ -42,6 +42,7 @@ public class FindCameraGridFragment extends Fragment {
 
     private static final String TAG = "FindCameraGridFragment";
     private static final int MSG_ON_GET_INPUT_INFO_LIST = 0x01;
+    private static final boolean DEBUG_MOCK = false;
 
     private ArrayList<InputInfo> mInputInfos = new ArrayList<>();
 
@@ -70,6 +71,7 @@ public class FindCameraGridFragment extends Fragment {
     };
 
     private InputAdapter mInputAdapter;
+    private ImageAdapter mImageAdapter;
     private GridView gridview;
     private TextView mTextView;
 
@@ -81,11 +83,13 @@ public class FindCameraGridFragment extends Fragment {
     @Override
     public void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
-        con.addCommandListener(commandListener);
-        { // test get input info
-            Request req = RequestFactory.createGetInputInfoRequest();
-            con.sendCommand(req);
+        if (!DEBUG_MOCK) {
+            ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+            con.addCommandListener(commandListener);
+            { // test get input info
+                Request req = RequestFactory.createGetInputInfoRequest();
+                con.sendCommand(req);
+            }
         }
     }
 
@@ -98,16 +102,43 @@ public class FindCameraGridFragment extends Fragment {
 
         mInputAdapter = new InputAdapter(rootView.getContext());
 
-        gridview.setAdapter(mInputAdapter);
+        if (DEBUG_MOCK) {
+            mImageAdapter = new ImageAdapter(rootView.getContext());
+            gridview.setAdapter(mImageAdapter);
+        } else {
+            gridview.setAdapter(mInputAdapter);
+        }
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mInputAdapter.toggleItemChecked(position);
-                if (mInputAdapter.isItemChecked(position)) {
-                    CameraInfo cameraInfo = new CameraInfo(view.getTop(), view.getLeft(), view.getWidth(), view.getHeight(), position, R.drawable.sample_0);
-                    EditProfileModel.getInstance().addCameraInfo(cameraInfo);
+                if (DEBUG_MOCK) {
+                    mImageAdapter.toggleItemChecked(position);
+                    if (mImageAdapter.isItemChecked(position)) {
+                        if (mInputAdapter.isItemChecked(position)) {
+                            CameraInfo cameraInfo = new CameraInfo(view.getTop(),
+                                    view.getLeft(),
+                                    view.getWidth(),
+                                    view.getHeight(),
+                                    mInputInfos.get(position).inputIndex,
+                                    R.drawable.sample_0);
+                            EditProfileModel.getInstance().addCameraInfo(cameraInfo);
+                        } else {
+                            EditProfileModel.getInstance().removeCameraInfo(position);
+                        }
+                    }
                 } else {
-                    EditProfileModel.getInstance().removeCameraInfo(position);
+                    mInputAdapter.toggleItemChecked(position);
+                    if (mInputAdapter.isItemChecked(position)) {
+                        CameraInfo cameraInfo = new CameraInfo(view.getTop(),
+                                view.getLeft(),
+                                view.getWidth(),
+                                view.getHeight(),
+                                mInputInfos.get(position).inputIndex,
+                                R.drawable.sample_0);
+                        EditProfileModel.getInstance().addCameraInfo(cameraInfo);
+                    } else {
+                        EditProfileModel.getInstance().removeCameraInfo(position);
+                    }
                 }
             }
         });
@@ -126,8 +157,10 @@ public class FindCameraGridFragment extends Fragment {
     @Override
     public void onStop () {
         super.onStop();
-        for (InputInfo inputInfo : mInputInfos) {
-            ConnectionManager.defaultManager.stopJpgTransport(new byte[]{(byte) inputInfo.inputIndex});
+        if (!DEBUG_MOCK) {
+            for (InputInfo inputInfo : mInputInfos) {
+                ConnectionManager.defaultManager.stopJpgTransport(new byte[]{(byte) inputInfo.inputIndex});
+            }
         }
     }
 

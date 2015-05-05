@@ -126,11 +126,20 @@ public abstract class Command {
             DatagramPacket packet = new DatagramPacket(datagram, datagram.length);
             socket.receive(packet);
 
+            StringBuilder sb = new StringBuilder();
+            for(int index = 0; index < 12; ++index) {
+                sb.append(String.valueOf(datagram[index])).append(":");
+            }
+            Log.i(TAG, sb.toString());
             ByteBuffer bb = ByteBuffer.wrap(datagram);
             bb.order(ByteOrder.LITTLE_ENDIAN);
 
             bb.get(new byte[4]); // skip header
             short length = bb.getShort();
+            Log.i(TAG, "read one command:packet.getLength():" + packet.getLength() + ", length in pack:" + length);
+            if (length != packet.getLength()) {
+                System.exit(0);
+            }
             if(length == 0) {
                 Log.i(TAG, "redundant package :packet.getLength():" + packet.getLength() + ", length in pack:" + length);
             } else {

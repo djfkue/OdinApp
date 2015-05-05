@@ -1,5 +1,7 @@
 package com.argonmobile.odinapp.util;
 
+import android.util.Log;
+
 import com.argonmobile.odinapp.model.ScreenStructure;
 
 public class ScaleFactorCaculator {
@@ -33,7 +35,10 @@ public class ScaleFactorCaculator {
         int screenHeight = ScreenStructure.getInstance().screenGroups[0].verticalCount * 1080;
         int screenWidth = ScreenStructure.getInstance().screenGroups[0].horizontalCount * 1920;
 
-        return screenWindowWidth * deviceScreenWidth / screenWidth;
+        float scaleFactor = deviceScreenWidth * 1.0f / screenWidth;
+
+        Log.e("TD_TRACE", "scaleFactor: " + scaleFactor);
+        return (int) (screenWindowWidth * scaleFactor);
     }
 
     public static int getDeviceWindowHeight(int screenWindowHeight, int deviceScreenWidth, int deviceScreenHeight) {

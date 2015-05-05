@@ -8,6 +8,7 @@ import android.util.SparseArray;
 import android.widget.ImageView;
 
 import java.lang.ref.SoftReference;
+import java.util.ArrayList;
 
 /**
  * Created by sean on 4/22/15.
@@ -26,37 +27,60 @@ public class ImageUpdater {
             return true;
         }
     };
-    private SparseArray<SoftReference<ImageView>> imageViewMap;
+    private SparseArray<ArrayList<SoftReference<ImageView>>> imageViewMap;
 
     public ImageUpdater() {
         if(Thread.currentThread() != Looper.getMainLooper().getThread()) {
             throw new IllegalStateException("ImageUpdater must be instantiated from main thread!");
         }
         handler = new Handler(callback);
-        imageViewMap = new SparseArray<SoftReference<ImageView>>();
+        imageViewMap = new SparseArray<ArrayList<SoftReference<ImageView>>>();
     }
 
     public void subscribe(int planOrSignalIndex, ImageView imageView) {
         synchronized (imageViewMap) {
-            imageViewMap.put(planOrSignalIndex, new SoftReference<ImageView>(imageView));
+            ArrayList<SoftReference<ImageView>> imageViews = imageViewMap.get(planOrSignalIndex);
+            if(imageViews == null) imageViews = new ArrayList<SoftReference<ImageView>>();
+            imageViews.add(new SoftReference<ImageView>(imageView));
+            imageViewMap.put(planOrSignalIndex, imageViews);
         }
     }
 
-    public void unsubscribe(int planOrSignalIndex) {
+    public void unsubscribe(int planOrSignalIndex, ImageView imageView) {
         synchronized (imageViewMap) {
-            imageViewMap.removeAt(planOrSignalIndex);
+            ArrayList<SoftReference<ImageView>> imageViews = imageViewMap.get(planOrSignalIndex);
+            if(imageViews == null) return;
+            for(SoftReference<ImageView> srImageView : imageViews) {
+                if(srImageView.get() != null && srImageView.get() == imageView) {
+                    imageViews.remove(srImageView);
+                    return;
+                }
+            }
+            if(imageViews.size() == 0) {
+                imageViewMap.removeAt(planOrSignalIndex);
+            }
         }
     }
 
     private void updateImage(int planOrSignalIndex, Bitmap bitmap) {
-        SoftReference<ImageView> srImageView = null;
+        ArrayList<SoftReference<ImageView>> imageViews = null;
         synchronized (imageViewMap) {
-            srImageView = imageViewMap.get(planOrSignalIndex);
-            if(srImageView == null || srImageView.get() == null) {
+            imageViews = imageViewMap.get(planOrSignalIndex);
+            if(imageViews == null || imageViews.size() == 0) {
                 imageViewMap.removeAt(planOrSignalIndex);
                 bitmap.recycle();
             } else {
-                srImageView.get().setImageBitmap(bitmap);
+                boolean usingImage = false;
+                for(SoftReference<ImageView> srImageView : imageViews) {
+                    if(srImageView.get() != null) {
+                        usingImage = true;
+                        srImageView.get().setImageBitmap(bitmap);
+                    }
+                }
+                if(!usingImage) {
+                    imageViewMap.removeAt(planOrSignalIndex);
+                    bitmap.recycle();
+                }
             }
         }
 

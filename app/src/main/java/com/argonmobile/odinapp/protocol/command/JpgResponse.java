@@ -1,5 +1,7 @@
 package com.argonmobile.odinapp.protocol.command;
 
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -29,6 +31,10 @@ public class JpgResponse extends Response {
         totalCount = (byteBuffer.get() & 0x000000FF);
         index = (byteBuffer.get() & 0x000000FF);
         imageData = new byte[length - getOverheadLength() - 4];
+        Log.e("TD_TRACE", "imageType: " + imageType + " planIndex: " + planIndex + " totalCount: " + totalCount + " index: " + index + "length: " + length);
+        if (length < 1412 && index < (totalCount - 1)) {
+            System.exit(0);
+        }
         byteBuffer.get(imageData);
     }
 }

@@ -84,7 +84,7 @@ public class ViewProfileFragment extends Fragment {
     private ImageUpdater imageUpdater = new ImageUpdater();
 
     private FreeProfileLayoutView mEditProfileLayoutView;
-    private ArrayList<WindowInfo> mWindowInfos;
+    private ArrayList<WindowInfo> mWindowInfos = new ArrayList<>();
     private Handler mHandler;
 
     private Handler.Callback callback = new Handler.Callback() {
@@ -110,41 +110,61 @@ public class ViewProfileFragment extends Fragment {
 
     private void updateWindowInfos() {
 
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        if (mEditProfileLayoutView != null && getActivity() != null) {
+            LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        for (WindowInfo windowInfo : mWindowInfos) {
-            int windowTop = windowInfo.top;
-            int windowLeft = windowInfo.left;
-            int windowWidth = windowInfo.width;
-            int windowHeight = windowInfo.height;
+            for (WindowInfo windowInfo : mWindowInfos) {
+                int windowTop = windowInfo.top;
+                int windowLeft = windowInfo.left;
+                int windowWidth = windowInfo.width;
+                int windowHeight = windowInfo.height;
 
-            int deviceWindowTop = ScaleFactorCaculator.getDeviceWindowTop(windowTop,
-                    mEditProfileLayoutView.getMeasuredWidth(),
-                    mEditProfileLayoutView.getMeasuredHeight());
-            int deviceWindowLeft = ScaleFactorCaculator.getDeviceWindowLeft(windowLeft,
-                    mEditProfileLayoutView.getMeasuredWidth(),
-                    mEditProfileLayoutView.getMeasuredHeight());
+                ScreenGroup screenGroup = ScreenStructure.getInstance().screenGroups[0];
+                float screenWidth = screenGroup.horizontalCount * 1920.0f;
+                float screenHeight = screenGroup.verticalCount * 1080.0f;
 
-            int deviceWindowWidth = ScaleFactorCaculator.getDeviceWindowWidth(windowWidth,
-                    mEditProfileLayoutView.getMeasuredWidth(),
-                    mEditProfileLayoutView.getMeasuredHeight());
+                int height = mEditProfileLayoutView.getMeasuredHeight();
+                Log.d(TAG, "editProfileLayoutHeight: " + height);
+                int width = (int) (height * ( screenWidth / screenHeight ));
 
-            int deviceWindowHeight = ScaleFactorCaculator.getDeviceWindowHeight(windowHeight,
-                    mEditProfileLayoutView.getMeasuredWidth(),
-                    mEditProfileLayoutView.getMeasuredHeight());
+                int deviceWindowTop = ScaleFactorCaculator.getDeviceWindowTop(windowTop,
+                        mEditProfileLayoutView.getMeasuredWidth(),
+                        mEditProfileLayoutView.getMeasuredHeight());
+                int deviceWindowLeft = ScaleFactorCaculator.getDeviceWindowLeft(windowLeft,
+                        width,
+                        mEditProfileLayoutView.getMeasuredHeight());
 
-            View child = inflater.inflate(R.layout.camera_grid_item, mEditProfileLayoutView, false);
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(deviceWindowWidth, deviceWindowHeight);
-            layoutParams.leftMargin = deviceWindowLeft;
-            layoutParams.topMargin = deviceWindowHeight;
-            ImageView imageView = (ImageView)child.findViewById(R.id.camera_view);
-            imageView.setImageResource(R.drawable.sample_0);
+                Log.e(TAG, "screenWindowWidth: " + windowWidth);
+                Log.e(TAG, "deviceScreenWidth: " + mEditProfileLayoutView.getMeasuredWidth());
+                int deviceWindowWidth = ScaleFactorCaculator.getDeviceWindowWidth(windowWidth,
+                        width,
+                        mEditProfileLayoutView.getMeasuredHeight());
 
-            mEditProfileLayoutView.addView(child, layoutParams);
+                Log.e(TAG, "deviceWindowWidth: " + deviceWindowWidth);
 
-            imageUpdater.subscribe(windowInfo.inputIndex, imageView);
-            ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
-                    (short)480, (short)270, new byte[]{(byte) windowInfo.inputIndex});
+                int deviceWindowHeight = ScaleFactorCaculator.getDeviceWindowHeight(windowHeight,
+                        mEditProfileLayoutView.getMeasuredWidth(),
+                        mEditProfileLayoutView.getMeasuredHeight());
+
+                View child = inflater.inflate(R.layout.camera_grid_item, mEditProfileLayoutView, false);
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(deviceWindowWidth, deviceWindowHeight);
+                layoutParams.leftMargin = deviceWindowLeft;
+                layoutParams.topMargin = deviceWindowTop;
+                layoutParams.width = deviceWindowWidth;
+                layoutParams.height = deviceWindowHeight;
+                ImageView imageView = (ImageView) child.findViewById(R.id.camera_view);
+                imageView.setImageResource(R.drawable.sample_0);
+
+                mEditProfileLayoutView.addView(child, layoutParams);
+
+                imageUpdater.subscribe(windowInfo.inputIndex, imageView);
+                ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
+                        (short) 480, (short) 270, new byte[]{(byte) windowInfo.inputIndex});
+//
+//                imageUpdater.subscribe(0, imageView);
+//                ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
+//                        (short) 480, (short) 270, new byte[]{0});
+            }
         }
     }
 
@@ -184,6 +204,7 @@ public class ViewProfileFragment extends Fragment {
 
     public ViewProfileFragment() {
         // Required empty public constructor
+        mHandler = new Handler(callback);
     }
 
     @Override
@@ -355,6 +376,21 @@ public class ViewProfileFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateWindowInfos();
+    }
+
+    @Override
+    public void onStop () {
+        super.onStop();
+        for (WindowInfo windowInfo : mWindowInfos) {
+            ConnectionManager.defaultManager.stopJpgTransport(new byte[]{(byte) windowInfo.inputIndex});
+        }
     }
 
     /**
