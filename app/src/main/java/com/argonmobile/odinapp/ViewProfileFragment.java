@@ -20,6 +20,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -49,6 +50,7 @@ import com.argonmobile.odinapp.util.ScaleFactorCaculator;
 import com.argonmobile.odinapp.view.FreeProfileLayoutView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -86,7 +88,7 @@ public class ViewProfileFragment extends Fragment {
 
     private int mProfileId;
 
-    private ImageUpdater imageUpdater = new ImageUpdater();
+    private ImageUpdater imageUpdater;
 
     private FreeProfileLayoutView mEditProfileLayoutView;
     private ArrayList<WindowInfo> mWindowInfos = new ArrayList<>();
@@ -117,6 +119,7 @@ public class ViewProfileFragment extends Fragment {
 
         if (mEditProfileLayoutView != null && getActivity() != null) {
             mEditProfileLayoutView.removeAllViews();
+            imageUpdater = new ImageUpdater();
             LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             for (WindowInfo windowInfo : mWindowInfos) {
@@ -130,7 +133,6 @@ public class ViewProfileFragment extends Fragment {
                 float screenHeight = screenGroup.verticalCount * 1080.0f;
 
                 int height = mEditProfileLayoutView.getMeasuredHeight();
-                Log.d(TAG, "editProfileLayoutHeight: " + height);
                 int width = (int) (height * ( screenWidth / screenHeight ));
 
                 int deviceWindowTop = ScaleFactorCaculator.getDeviceWindowTop(windowTop,
@@ -164,9 +166,25 @@ public class ViewProfileFragment extends Fragment {
 
                 mEditProfileLayoutView.addView(child, layoutParams);
 
+                child.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getActivity(), ControlInputActivity.class);
+                        startActivity(intent);
+                    }
+                });
+
                 imageUpdater.subscribe(windowInfo.inputIndex, imageView);
                 ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
-                        (short) 480, (short) 270, new byte[]{(byte) windowInfo.inputIndex});
+                        (short) 240, (short) 180, new byte[]{(byte) windowInfo.inputIndex});
+
+                CameraInfo cameraInfo = new CameraInfo(deviceWindowTop,
+                        deviceWindowLeft,
+                        deviceWindowWidth,
+                        deviceWindowHeight,
+                        windowInfo.inputIndex,
+                        R.drawable.sample_0);
+                EditProfileModel.getInstance().addCameraInfo(cameraInfo);
 //
 //                imageUpdater.subscribe(0, imageView);
 //                ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
@@ -289,11 +307,14 @@ public class ViewProfileFragment extends Fragment {
 
                         //if (isLandScape) {
                         int height = mEditProfileLayoutView.getMeasuredHeight();
-                        Log.d(TAG, "editProfileLayoutHeight: " + height);
                         int width = (int) (height * ( screenWidth / screenHeight ));
-                        ViewGroup.LayoutParams layoutParams = mEditProfileLayoutView.getLayoutParams();
+
+                        Log.e(TAG, "editProfileLayoutWidth: " + width);
+                        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mEditProfileLayoutView.getLayoutParams();
+
                         layoutParams.width = width;
                         mEditProfileLayoutView.setLayoutParams(layoutParams);
+                        mEditProfileLayoutView.postInvalidate();
                         return true;
                     }
                 });

@@ -45,7 +45,7 @@
             android:descendantFocusability="beforeDescendants">
             <com.argonmobile.odinapp.view.FreeProfileLayoutView
                 android:id="@+id/camera_container"
-                android:layout_width="800dp"
+                android:layout_width="200dp"
                 android:layout_height="match_parent">
             </com.argonmobile.odinapp.view.FreeProfileLayoutView>
         </LinearLayout>

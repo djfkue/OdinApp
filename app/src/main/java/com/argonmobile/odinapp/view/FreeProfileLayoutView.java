@@ -34,6 +34,7 @@ public class FreeProfileLayoutView extends RelativeLayout {
 
     private Paint mRectPaint;
     private Paint mInnerCellPaint;
+    private boolean mEnableGesture = false;
 
     public FreeProfileLayoutView(Context context) {
         super(context);
@@ -45,7 +46,7 @@ public class FreeProfileLayoutView extends RelativeLayout {
         mScaleGestureDetector.setQuickScaleEnabled(true);
         mRectPaint = new Paint();
         mRectPaint.setStyle(Paint.Style.STROKE);
-        mRectPaint.setColor(Color.WHITE);
+        mRectPaint.setColor(Color.RED);
         mRectPaint.setStrokeWidth(5.0f);
 
         mInnerCellPaint = new Paint();
@@ -69,9 +70,8 @@ public class FreeProfileLayoutView extends RelativeLayout {
         mHScreenCount = hScreenCount;
     }
 
-    @Override
-    protected void onDraw (Canvas canvas) {
-
+    public void enableGesture(boolean enable) {
+        mEnableGesture = enable;
     }
 
     @Override
@@ -81,31 +81,38 @@ public class FreeProfileLayoutView extends RelativeLayout {
     }
 
     private void drawCells(Canvas canvas) {
-        canvas.drawRect(getLeft(), getTop(), getRight(), getBottom(), mRectPaint);
+        Rect rect = new Rect();
+        getDrawingRect(rect);
+        canvas.drawRect(rect.left, rect.top, rect.right, rect.bottom, mRectPaint);
 
         for (int i = 0; i < mHScreenCount * 2; i++) {
             int startX = i * getWidth() / mHScreenCount / 2;
-            canvas.drawLine(startX, getTop(), startX, getBottom(), mInnerCellPaint);
+            canvas.drawLine(startX, rect.top, startX, rect.bottom, mInnerCellPaint);
         }
 
         for (int i = 0; i < mVScreenCount * 2; i++) {
             int startY = i * getHeight() / mVScreenCount / 2;
-            canvas.drawLine(getLeft(), startY, getRight(), startY, mInnerCellPaint);
+            canvas.drawLine(rect.left, startY, rect.right, startY, mInnerCellPaint);
         }
 
         for (int i = 0; i < mHScreenCount; i++) {
             int startX = i * getWidth() / mHScreenCount;
-            canvas.drawLine(startX, getTop(), startX, getBottom(), mRectPaint);
+            canvas.drawLine(startX, rect.top, startX, rect.bottom, mRectPaint);
         }
 
         for(int i = 0; i < mVScreenCount; i++) {
             int startY = i * getHeight() / mVScreenCount;
-            canvas.drawLine(getLeft(), startY, getRight(), startY, mRectPaint);
+            canvas.drawLine(rect.left, startY, rect.right, startY, mRectPaint);
         }
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+
+        if (!mEnableGesture) {
+            return super.onInterceptTouchEvent(ev);
+        }
+
         /*
          * This method JUST determines whether we want to intercept the motion.
          * If we return true, onTouchEvent will be called and we do the actual
@@ -169,6 +176,11 @@ public class FreeProfileLayoutView extends RelativeLayout {
     public boolean onTouchEvent(MotionEvent ev) {
         Log.e("SD_TRACE", "onTouchEvent.....................:" + ev.getPointerCount());
         Log.e("SD_TRACE", "onTouchEvent.....................action:" + ev.getAction());
+
+        if (!mEnableGesture) {
+            return super.onTouchEvent(ev);
+        }
+
         if (checkGestureTrigger(ev)) {
             mIsTrigging = true;
             getParent().requestDisallowInterceptTouchEvent(true);

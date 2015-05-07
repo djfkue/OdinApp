@@ -76,6 +76,8 @@ public class EditProfileFragment extends Fragment {
 
         mEditProfileLayoutView.setOnDragListener(mFrameDragListener);
 
+        mEditProfileLayoutView.enableGesture(true);
+
         mGridView = (GridView) rootView.findViewById(R.id.grid_view);
         mEditProfileCameraAdapter = new EditProfileCameraAdapter(rootView.getContext());
         mGridView.setAdapter(mEditProfileCameraAdapter);
@@ -174,7 +176,7 @@ public class EditProfileFragment extends Fragment {
 
         for (int i = 0; i < mGridView.getChildCount(); i++) {
             View cameraView = mGridView.getChildAt(i);
-
+/*
             int[] screenLocation = new int[2];
             cameraView.getLocationOnScreen(screenLocation);
             CameraInfo cameraInfo = EditProfileModel.getInstance().getCameraInfoArrayList().get(i);
@@ -186,7 +188,7 @@ public class EditProfileFragment extends Fragment {
             cameraView.animate().setDuration(duration).
                     translationX(0).translationY(0).
                     setInterpolator(sDecelerator).withLayer();
-
+*/
             // Fade in the black background
             ObjectAnimator bgAnim = ObjectAnimator.ofInt(mBackground, "alpha", 0, 255);
             bgAnim.setDuration(duration);
@@ -217,7 +219,7 @@ public class EditProfileFragment extends Fragment {
                         setInterpolator(sDecelerator).withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        performUpdateProfileModel();
+                        //performUpdateProfileModel();
                         createEditProfileLayout();
                     }
                 });
@@ -251,6 +253,8 @@ public class EditProfileFragment extends Fragment {
 
     private void createEditProfileLayout() {
         ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
+
+        Log.e("TD_TRACE", "create edit profile layout: " + cameraInfos.size());
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         for (int i = 0; i < cameraInfos.size(); i++) {
             //View cameraView = mGridView.getChildAt(i);
@@ -268,7 +272,7 @@ public class EditProfileFragment extends Fragment {
 
             imageUpdater.subscribe(cameraInfo.getId(), imageView);
             ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
-                    (short)480, (short)270, new byte[]{(byte) cameraInfo.getId()});
+                    (short)240, (short)180, new byte[]{(byte) cameraInfo.getId()});
 
             final CheckedFrameLayout checkedFrameLayout = (CheckedFrameLayout) child.findViewById(R.id.checked_frame);
 
@@ -295,30 +299,9 @@ public class EditProfileFragment extends Fragment {
                     if (mCurrentChecked != checkedView && checked) {
                         if (mCurrentChecked != null) {
                             mCurrentChecked.setChecked(false);
-                            //mCurrentChecked.setOnDragListener(mCameraDragListener);
                         }
                         mCurrentChecked = checkedView;
                         Log.e(TAG, "current checked: " +mCurrentChecked.toString());
-
-//                        final ScaleGestureDetector scaleGestureDetector = new ScaleGestureDetector(getActivity(), new ScaleListener(mCurrentChecked));
-
-//                        mCurrentChecked.setOnTouchListener(new View.OnTouchListener() {
-//                            @Override
-//                            public boolean onTouch(View view, MotionEvent motionEvent) {
-//
-//                                Log.e(TAG, "onTouch............" + motionEvent.getPointerCount() + " : " + motionEvent.getAction());
-//
-//                                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-//                                    ClipData data = ClipData.newPlainText("", "");
-//                                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
-//                                    view.startDrag(data, shadowBuilder, view, 0);
-//                                    view.setVisibility(View.INVISIBLE);
-//                                    return true;
-//                                } else {
-//                                    return false;
-//                                }
-//                            }
-//                        });
 
                         mCurrentChecked.setOnDragListener(null);
                     }
