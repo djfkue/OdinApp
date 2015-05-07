@@ -28,9 +28,14 @@ import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
 import com.argonmobile.odinapp.model.ScreenStructure;
 import com.argonmobile.odinapp.model.WindowInfoModel;
+import com.argonmobile.odinapp.protocol.command.CloseWindowCommand;
 import com.argonmobile.odinapp.protocol.command.Command;
+import com.argonmobile.odinapp.protocol.command.CommandDefs;
+import com.argonmobile.odinapp.protocol.command.CreateWindowCommand;
 import com.argonmobile.odinapp.protocol.command.GetInputInfoResponse;
 import com.argonmobile.odinapp.protocol.command.GetPlanWindowListResponse;
+import com.argonmobile.odinapp.protocol.command.MoveWindowCommand;
+import com.argonmobile.odinapp.protocol.command.Notification;
 import com.argonmobile.odinapp.protocol.command.Request;
 import com.argonmobile.odinapp.protocol.command.RequestFactory;
 import com.argonmobile.odinapp.protocol.connection.CommandListener;
@@ -111,6 +116,7 @@ public class ViewProfileFragment extends Fragment {
     private void updateWindowInfos() {
 
         if (mEditProfileLayoutView != null && getActivity() != null) {
+            mEditProfileLayoutView.removeAllViews();
             LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             for (WindowInfo windowInfo : mWindowInfos) {
@@ -152,6 +158,7 @@ public class ViewProfileFragment extends Fragment {
                 layoutParams.topMargin = deviceWindowTop;
                 layoutParams.width = deviceWindowWidth;
                 layoutParams.height = deviceWindowHeight;
+
                 ImageView imageView = (ImageView) child.findViewById(R.id.camera_view);
                 imageView.setImageResource(R.drawable.sample_0);
 
@@ -197,6 +204,23 @@ public class ViewProfileFragment extends Fragment {
 
 //                ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
 //                        (short)480, (short)270, new byte[]{0x00});
+            }
+
+            if (cmd instanceof MoveWindowCommand) {
+                ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+                {
+                    Request req = RequestFactory.createGetPlanWindowListRequest();
+                    con.sendCommand(req);
+                }
+            }
+
+            if (cmd instanceof CreateWindowCommand || cmd instanceof CloseWindowCommand) {
+                ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+                {
+                    Request req = RequestFactory.createGetPlanWindowListRequest();
+                    con.sendCommand(req);
+                }
+
             }
         }
     };
