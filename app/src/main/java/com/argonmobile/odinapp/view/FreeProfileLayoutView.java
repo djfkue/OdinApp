@@ -46,7 +46,7 @@ public class FreeProfileLayoutView extends RelativeLayout {
         mScaleGestureDetector.setQuickScaleEnabled(true);
         mRectPaint = new Paint();
         mRectPaint.setStyle(Paint.Style.STROKE);
-        mRectPaint.setColor(Color.RED);
+        mRectPaint.setColor(Color.LTGRAY);
         mRectPaint.setStrokeWidth(5.0f);
 
         mInnerCellPaint = new Paint();
@@ -122,7 +122,6 @@ public class FreeProfileLayoutView extends RelativeLayout {
         final int action = MotionEventCompat.getActionMasked(ev);
 
         Log.e("SD_TRACE", "onInterceptTouchEvent.....................:" + ev.getPointerCount());
-
         Log.e("SD_TRACE", "onInterceptTouchEvent.....................action:" + ev.getAction());
 
         // Always handle the case of the touch gesture being complete.

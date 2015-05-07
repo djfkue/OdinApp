@@ -64,6 +64,7 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
                 Log.e(TAG, "onScaleEnd....");
                 if (mScaleFactor < 0.7f) {
                     Intent intent = new Intent(ChosenProfileActivity.this, FindCameraActivity.class);
+                    intent.putExtra("CLEAR_INPUT", true);
                     startActivity(intent);
                     finish();
                 } else if (mScaleFactor < 1) {
@@ -71,6 +72,7 @@ public class ChosenProfileActivity extends ActionBarActivity implements ViewProf
                 } else if (mScaleFactor > 1.1f) {
 //                    mViewProfileFragment.performUpdateProfileModel();
                     Intent intent = new Intent(ChosenProfileActivity.this, EditProfileActivity.class);
+                    intent.putExtra("NEED_RELAYOUT", false);
                     startActivity(intent);
                     overridePendingTransition(R.anim.fadein, R.anim.fadeout);
                 }

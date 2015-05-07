@@ -118,6 +118,7 @@ public class ViewProfileFragment extends Fragment {
     private void updateWindowInfos() {
 
         if (mEditProfileLayoutView != null && getActivity() != null) {
+            EditProfileModel.getInstance().clearCameraInfoArrayList();
             mEditProfileLayoutView.removeAllViews();
             imageUpdater = new ImageUpdater();
             LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -436,6 +437,9 @@ public class ViewProfileFragment extends Fragment {
         for (WindowInfo windowInfo : mWindowInfos) {
             ConnectionManager.defaultManager.stopJpgTransport(new byte[]{(byte) windowInfo.inputIndex});
         }
+
+        ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+        con.removeCommandListener(commandListener);
     }
 
     /**

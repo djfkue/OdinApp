@@ -5,11 +5,15 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.ScaleGestureDetector;
@@ -19,25 +23,36 @@ import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.argonmobile.odinapp.dummy.EditProfileCameraAdapter;
 import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
 import com.argonmobile.odinapp.model.ScreenStructure;
+import com.argonmobile.odinapp.model.WindowInfoModel;
+import com.argonmobile.odinapp.protocol.command.CloseWindowCommand;
+import com.argonmobile.odinapp.protocol.command.Command;
+import com.argonmobile.odinapp.protocol.command.CreateWindowCommand;
+import com.argonmobile.odinapp.protocol.command.GetPlanWindowListResponse;
+import com.argonmobile.odinapp.protocol.command.MoveWindowCommand;
+import com.argonmobile.odinapp.protocol.command.Request;
+import com.argonmobile.odinapp.protocol.command.RequestFactory;
+import com.argonmobile.odinapp.protocol.connection.CommandListener;
 import com.argonmobile.odinapp.protocol.connection.ConnectionManager;
-import com.argonmobile.odinapp.protocol.deviceinfo.InputInfo;
+import com.argonmobile.odinapp.protocol.connection.ControlConnection;
 import com.argonmobile.odinapp.protocol.deviceinfo.ScreenGroup;
+import com.argonmobile.odinapp.protocol.deviceinfo.WindowInfo;
 import com.argonmobile.odinapp.protocol.image.ImageUpdater;
 import com.argonmobile.odinapp.util.MockSwitch;
+import com.argonmobile.odinapp.util.ScaleFactorCaculator;
 import com.argonmobile.odinapp.view.CheckedFrameLayout;
 import com.argonmobile.odinapp.view.FreeProfileLayoutView;
-import com.argonmobile.odinapp.view.ShadowLayout;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -53,16 +68,194 @@ public class EditProfileFragment extends Fragment {
     private static final TimeInterpolator sAccelerator = new AccelerateInterpolator();
 
     private EditProfileCameraAdapter mEditProfileCameraAdapter;
-    private GridView mGridView;
+    //private GridView mGridView;
     private ColorDrawable mBackground;
     private TextView mTextView;
     private FreeProfileLayoutView mEditProfileLayoutView;
     private CheckedFrameLayout mCurrentChecked;
 
+    private int mCellHeight = 0;
+    private int mCellWidth;
+
     private ImageUpdater imageUpdater = new ImageUpdater();
+
+    private ArrayList<WindowInfo> mWindowInfos = new ArrayList<>();
+    private Handler mHandler;
+
+    private Handler.Callback callback = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            if(msg.what == MSG_ON_GET_PLAN_WINDOW_LIST) {
+                mWindowInfos.clear();
+                List<WindowInfo> windowInfos = (List<WindowInfo>) msg.obj;
+
+                Log.e(TAG, "============== getCount: " + windowInfos.size());
+                for (WindowInfo windowInfo : windowInfos) {
+                    mWindowInfos.add(windowInfo);
+                }
+
+                updateWindowInfos();
+
+                //gridview.setAdapter(mInputAdapter);
+                //updateInputInfoAdapter();
+            }
+            return true;
+        }
+    };
+
+    private static final int MSG_ON_GET_PLAN_WINDOW_LIST = 0x01;
+
+
+    private void updateWindowInfos() {
+
+        if (mEditProfileLayoutView != null && getActivity() != null) {
+            mEditProfileLayoutView.removeAllViews();
+            imageUpdater = new ImageUpdater();
+            LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            for (WindowInfo windowInfo : mWindowInfos) {
+                int windowTop = windowInfo.top;
+                int windowLeft = windowInfo.left;
+                int windowWidth = windowInfo.width;
+                int windowHeight = windowInfo.height;
+
+                ScreenGroup screenGroup = ScreenStructure.getInstance().screenGroups[0];
+                float screenWidth = screenGroup.horizontalCount * 1920.0f;
+                float screenHeight = screenGroup.verticalCount * 1080.0f;
+
+                int height = mEditProfileLayoutView.getMeasuredHeight();
+                int width = (int) (height * ( screenWidth / screenHeight ));
+
+                int deviceWindowTop = ScaleFactorCaculator.getDeviceWindowTop(windowTop,
+                        mEditProfileLayoutView.getMeasuredWidth(),
+                        mEditProfileLayoutView.getMeasuredHeight());
+                int deviceWindowLeft = ScaleFactorCaculator.getDeviceWindowLeft(windowLeft,
+                        width,
+                        mEditProfileLayoutView.getMeasuredHeight());
+
+                Log.e(TAG, "screenWindowWidth: " + windowWidth);
+                Log.e(TAG, "deviceScreenWidth: " + mEditProfileLayoutView.getMeasuredWidth());
+                int deviceWindowWidth = ScaleFactorCaculator.getDeviceWindowWidth(windowWidth,
+                        width,
+                        mEditProfileLayoutView.getMeasuredHeight());
+
+                Log.e(TAG, "deviceWindowWidth: " + deviceWindowWidth);
+
+                int deviceWindowHeight = ScaleFactorCaculator.getDeviceWindowHeight(windowHeight,
+                        mEditProfileLayoutView.getMeasuredWidth(),
+                        mEditProfileLayoutView.getMeasuredHeight());
+
+                final CheckedFrameLayout child = (CheckedFrameLayout) inflater.inflate(R.layout.camera_grid_item, mEditProfileLayoutView, false);
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(deviceWindowWidth, deviceWindowHeight);
+                layoutParams.leftMargin = deviceWindowLeft;
+                layoutParams.topMargin = deviceWindowTop;
+                layoutParams.width = deviceWindowWidth;
+                layoutParams.height = deviceWindowHeight;
+
+                ImageView imageView = (ImageView) child.findViewById(R.id.camera_view);
+                imageView.setImageResource(R.drawable.sample_0);
+
+                mEditProfileLayoutView.addView(child, layoutParams);
+
+                child.setOnDragListener(mCameraDragListener);
+
+                child.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        child.toggle();
+                        v.bringToFront();
+                    }
+                });
+
+                child.setOnCheckedListener(new CheckedFrameLayout.OnCheckedListener() {
+                    @Override
+                    public void onChecked(CheckedFrameLayout checkedView, boolean checked) {
+                        if (checked == false) {
+                            checkedView.setOnTouchListener(null);
+                            checkedView.setOnDragListener(mCameraDragListener);
+                            if (mCurrentChecked == checkedView) {
+                                mCurrentChecked = null;
+                            }
+                        }
+                        if (mCurrentChecked != checkedView && checked) {
+                            if (mCurrentChecked != null) {
+                                mCurrentChecked.setChecked(false);
+                            }
+                            mCurrentChecked = checkedView;
+                            Log.e(TAG, "current checked: " + mCurrentChecked.toString());
+
+                            mCurrentChecked.setOnDragListener(null);
+                        }
+                    }
+                });
+
+                imageUpdater.subscribe(windowInfo.inputIndex, imageView);
+                ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
+                        (short) 240, (short) 180, new byte[]{(byte) windowInfo.inputIndex});
+
+//
+//                imageUpdater.subscribe(0, imageView);
+//                ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
+//                        (short) 480, (short) 270, new byte[]{0});
+            }
+        }
+    }
+
+
+    CommandListener commandListener = new CommandListener() {
+        @Override
+        public void onSentCommand(Command cmd) {
+            Log.i(TAG, "onSentCommand:" + cmd.command);
+        }
+
+        @Override
+        public void onReceivedCommand(Command cmd) {
+            Log.i(TAG, "onReceivedCommand:" + cmd);
+            if(cmd instanceof GetPlanWindowListResponse) {
+
+                GetPlanWindowListResponse r = (GetPlanWindowListResponse) cmd;
+                Log.i(TAG, "GetPlanWindowListResponse list sg window count:" + r.windowCount);
+                WindowInfoModel.getInstance().windowInfos = r.windowInfos;
+
+
+                Message message = new Message();
+                message.what = MSG_ON_GET_PLAN_WINDOW_LIST;
+
+                message.obj = r.windowInfos;
+
+                mHandler.sendMessage(message);
+
+                for (WindowInfo ws : r.windowInfos) {
+                    Log.i(TAG, "get plan window list sg:" + ws);
+                }
+
+//                ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
+//                        (short)480, (short)270, new byte[]{0x00});
+            }
+
+            if (cmd instanceof MoveWindowCommand) {
+                ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+                {
+                    Request req = RequestFactory.createGetPlanWindowListRequest();
+                    con.sendCommand(req);
+                }
+            }
+
+            if (cmd instanceof CreateWindowCommand || cmd instanceof CloseWindowCommand) {
+                ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+                {
+                    Request req = RequestFactory.createGetPlanWindowListRequest();
+                    con.sendCommand(req);
+                }
+
+            }
+        }
+    };
 
     public EditProfileFragment() {
         // Required empty public constructor
+
+        mHandler = new Handler(callback);
     }
 
 
@@ -78,16 +271,12 @@ public class EditProfileFragment extends Fragment {
 
         mEditProfileLayoutView.enableGesture(true);
 
-        mGridView = (GridView) rootView.findViewById(R.id.grid_view);
-        mEditProfileCameraAdapter = new EditProfileCameraAdapter(rootView.getContext());
-        mGridView.setAdapter(mEditProfileCameraAdapter);
-
         if (savedInstanceState == null) {
-            mGridView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            mEditProfileLayoutView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
 
-                    mGridView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    mEditProfileLayoutView.getViewTreeObserver().removeOnPreDrawListener(this);
 
                     runEnterAnimation();
 
@@ -104,8 +293,11 @@ public class EditProfileFragment extends Fragment {
 
                         //if (isLandScape) {
                         int height = mEditProfileLayoutView.getMeasuredHeight();
+                        mCellHeight = height / screenGroup.verticalCount / 2;
                         Log.d(TAG, "editProfileLayoutHeight: " + height);
                         int width = (int) (height * (screenWidth / screenHeight));
+
+                        mCellWidth = width / screenGroup.horizontalCount / 2;
                         ViewGroup.LayoutParams layoutParams = mEditProfileLayoutView.getLayoutParams();
                         layoutParams.width = width;
                         mEditProfileLayoutView.setLayoutParams(layoutParams);
@@ -133,30 +325,36 @@ public class EditProfileFragment extends Fragment {
             });
         }
 
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mEditProfileCameraAdapter.toggleItemChecked(position);
-//                view.setTag(position);
-//                view.setOnLongClickListener(new View.OnLongClickListener() {
-//                    @Override
-//                    public boolean onLongClick(View v) {
-//                        ClipData.Item item = new ClipData.Item("TEST");
-//                        ClipData dragData = new ClipData("TEST", new String[] {ClipDescription.MIMETYPE_TEXT_PLAIN},item);
-//                        // Instantiates the drag shadow builder.
-//                        View.DragShadowBuilder myShadow = new View.DragShadowBuilder(v);
-//                        v.startDrag(dragData, myShadow, null, 0);
-//                        return true;
-//                    }
-//                });
-            }
-        });
-
         mBackground = new ColorDrawable(Color.BLACK);
         rootView.setBackground(mBackground);
 
         mTextView = (TextView) rootView.findViewById(R.id.title_view);
+
+        Log.d("TD_TRACE", "onCreateView........");
+        if (EditProfileActivity.sNeedRelayout) {
+            //closeAllWindow();
+        }
+
+        ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+        con.addCommandListener(commandListener);
+        {
+            Request req = RequestFactory.createGetPlanWindowListRequest();
+            con.sendCommand(req);
+        }
+
         return rootView;
+    }
+
+    private void closeAllWindow() {
+        ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+        {
+            List<WindowInfo> windowInfos = WindowInfoModel.getInstance().windowInfos;
+            for (WindowInfo windowInfo : windowInfos) {
+                Log.e("TD_TRACE", "send close window request");
+                Command req = RequestFactory.createCloseWindowRequest(windowInfo.windowId);
+                con.sendCommand(req);
+            }
+        }
     }
 
     @Override
@@ -170,35 +368,7 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void runEnterAnimation() {
-        Log.e(TAG, "gridview child count: " + mGridView.getChildCount());
-
         final long duration = (long) (ANIM_DURATION);
-
-        for (int i = 0; i < mGridView.getChildCount(); i++) {
-            View cameraView = mGridView.getChildAt(i);
-/*
-            int[] screenLocation = new int[2];
-            cameraView.getLocationOnScreen(screenLocation);
-            CameraInfo cameraInfo = EditProfileModel.getInstance().getCameraInfoArrayList().get(i);
-            int leftDelta = cameraInfo.getLeft() - screenLocation[0];
-            int topDelta = cameraInfo.getTop() - screenLocation[1];
-            cameraView.setTranslationX(leftDelta);
-            cameraView.setTranslationY(topDelta);
-
-            cameraView.animate().setDuration(duration).
-                    translationX(0).translationY(0).
-                    setInterpolator(sDecelerator).withLayer();
-*/
-            // Fade in the black background
-            ObjectAnimator bgAnim = ObjectAnimator.ofInt(mBackground, "alpha", 0, 255);
-            bgAnim.setDuration(duration);
-            bgAnim.start();
-
-            // Animate a drop-shadow of the image
-//            ObjectAnimator shadowAnim = ObjectAnimator.ofFloat(shadowLayout, "shadowDepth", 0, 1);
-//            shadowAnim.setDuration(duration);
-//            shadowAnim.start();
-        }
 
         mTextView.setAlpha(0);
 
@@ -219,8 +389,11 @@ public class EditProfileFragment extends Fragment {
                         setInterpolator(sDecelerator).withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        //performUpdateProfileModel();
-                        createEditProfileLayout();
+                        if (EditProfileActivity.sNeedRelayout) {
+                            performUpdateProfileModel();
+                            //addWindows();
+                        }
+                        //createEditProfileLayout();
                     }
                 });
 
@@ -240,20 +413,60 @@ public class EditProfileFragment extends Fragment {
 
     }
 
+    private void addWindows() {
+        ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+        {
+//            List<WindowInfo> windowInfos = WindowInfoModel.getInstance().windowInfos;
+//            for (WindowInfo windowInfo : windowInfos) {
+//                Log.e("TD_TRACE", "send add window request");
+//                Command req = RequestFactory.createCloseWindowRequest(windowInfo.windowId);
+//                con.sendCommand(req);
+//            }
+            ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
+
+            for (int i = 0; i < cameraInfos.size(); i++) {
+                CameraInfo cameraInfo = cameraInfos.get(i);
+                CreateWindowCommand req = (CreateWindowCommand) RequestFactory.createNewWindowRequest();
+                req.windowId = (short) i;
+                req.inputIndex = (short) cameraInfo.getId();
+                req.userZOrder = (short) i;
+                req.input = (short) cameraInfo.getId();
+                req.divideMode = 0;
+                req.subInputs = new short[0];
+                req.url = "tmp";
+                req.panelGroupId = 0;
+                req.left = (short) cameraInfo.mLeft;
+                req.top = (short) cameraInfo.mTop;
+                req.width = (short) cameraInfo.mWidth;
+                req.height = (short) cameraInfo.mHeight;
+                req.leftTop = (short) cameraInfo.mLeft;
+                req.rightBottom = (short) (cameraInfo.mLeft + cameraInfo.mWidth);
+                con.sendCommand(req);
+            }
+        }
+    }
+
     public void performUpdateProfileModel() {
         Log.e(TAG, "performUpdateProfileModel");
         ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
-        for (int i = 0; i < mGridView.getChildCount(); i++) {
-            View view = mGridView.getChildAt(i);
+
+        ScreenGroup screenGroup = ScreenStructure.getInstance().screenGroups[0];
+
+        for (int i = 0; i < cameraInfos.size(); i++) {
             CameraInfo cameraInfo = cameraInfos.get(i);
-            cameraInfo.mLeft = view.getLeft();
-            cameraInfo.mTop = view.getTop();
+            cameraInfo.mLeft = (i % (screenGroup.horizontalCount * 2)) * mCellWidth;
+            cameraInfo.mTop = (i / (screenGroup.horizontalCount * 2)) * mCellHeight;
+            cameraInfo.mWidth = mCellWidth;
+            cameraInfo.mHeight = mCellHeight;
+
         }
+
     }
 
     private void createEditProfileLayout() {
         ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
 
+        mEditProfileLayoutView.removeAllViews();
         Log.e("TD_TRACE", "create edit profile layout: " + cameraInfos.size());
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         for (int i = 0; i < cameraInfos.size(); i++) {
@@ -301,13 +514,12 @@ public class EditProfileFragment extends Fragment {
                             mCurrentChecked.setChecked(false);
                         }
                         mCurrentChecked = checkedView;
-                        Log.e(TAG, "current checked: " +mCurrentChecked.toString());
+                        Log.e(TAG, "current checked: " + mCurrentChecked.toString());
 
                         mCurrentChecked.setOnDragListener(null);
                     }
                 }
             });
-            mGridView.setVisibility(View.GONE);
         }
     }
 
@@ -492,6 +704,85 @@ public class EditProfileFragment extends Fragment {
             mView.setScaleY(mScaleFactor);
 
             return true;
+        }
+    }
+
+    class EditProfileCameraAdapter extends BaseAdapter {
+        private final LayoutInflater mInflater;
+        private Context mContext;
+
+        private SparseBooleanArray mCheckStates;
+        private int mCheckedItemCount;
+
+        public EditProfileCameraAdapter(Context c) {
+            mContext = c;
+            mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mCheckedItemCount = 0;
+            mCheckStates = new SparseBooleanArray();
+        }
+
+        public boolean isItemChecked(int position) {
+            return mCheckStates.get(position);
+        }
+
+        public void toggleItemChecked(int position) {
+            boolean oldValue = mCheckStates.get(position);
+            mCheckStates.put(position, !oldValue);
+            if (oldValue) {
+                mCheckedItemCount--;
+            } else {
+                mCheckedItemCount++;
+            }
+            notifyDataSetChanged();
+        }
+
+        public SparseBooleanArray getCheckedItemPositions() {
+            return mCheckStates;
+        }
+
+        public int getCheckedItemCount() {
+            return mCheckedItemCount;
+        }
+
+        public boolean isAllItemChecked() {
+            return mCheckedItemCount == getCount();
+        }
+
+        public boolean hasItemChecked() {
+            return mCheckedItemCount > 0;
+        }
+
+        public int getCount() {
+            return EditProfileModel.getInstance().getCameraInfoArrayList().size();
+        }
+
+        public Object getItem(int position) {
+            return null;
+        }
+
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        // create a new ImageView for each item referenced by the Adapter
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            CameraInfo cameraInfo = EditProfileModel.getInstance().getCameraInfoArrayList().get(position);
+
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.camera_grid_item, parent, false);
+            }
+            //final float scale = mContext.getResources().getDisplayMetrics().density;
+            //convertView.setLayoutParams(new GridView.LayoutParams((int)(220 * scale), (int)(135 * scale)));
+
+            CheckedFrameLayout checkedLayout = (CheckedFrameLayout) convertView.findViewById(R.id.checked_frame);
+            checkedLayout.setChecked(isItemChecked(position));
+
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.camera_view);
+
+            imageView.setImageResource(cameraInfo.getBitmap());
+
+            return convertView;
         }
     }
 }

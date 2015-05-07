@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.argonmobile.odinapp.dummy.ImageAdapter;
 import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
+import com.argonmobile.odinapp.model.WindowInfoModel;
 import com.argonmobile.odinapp.protocol.command.Command;
 import com.argonmobile.odinapp.protocol.command.GetInputInfoResponse;
 import com.argonmobile.odinapp.protocol.command.Request;
@@ -28,6 +29,7 @@ import com.argonmobile.odinapp.protocol.connection.CommandListener;
 import com.argonmobile.odinapp.protocol.connection.ConnectionManager;
 import com.argonmobile.odinapp.protocol.connection.ControlConnection;
 import com.argonmobile.odinapp.protocol.deviceinfo.InputInfo;
+import com.argonmobile.odinapp.protocol.deviceinfo.WindowInfo;
 import com.argonmobile.odinapp.protocol.image.ImageUpdater;
 import com.argonmobile.odinapp.view.CheckedFrameLayout;
 
@@ -155,11 +157,28 @@ public class FindCameraGridFragment extends Fragment {
     }
 
     @Override
+    public void onDetach() {
+        Log.e("TD_TRACE", "onDetach....................");
+
+        super.onDetach();
+    }
+
+    @Override
     public void onStop () {
         super.onStop();
         if (!DEBUG_MOCK) {
             for (InputInfo inputInfo : mInputInfos) {
                 ConnectionManager.defaultManager.stopJpgTransport(new byte[]{(byte) inputInfo.inputIndex});
+            }
+            ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+            con.removeCommandListener(commandListener);
+            {
+                List<WindowInfo> windowInfos = WindowInfoModel.getInstance().windowInfos;
+                for (WindowInfo windowInfo : windowInfos) {
+                    Log.e("TD_TRACE", "send close window request");
+                    Command req = RequestFactory.createCloseWindowRequest(windowInfo.windowId);
+                    con.sendCommand(req);
+                }
             }
         }
     }
@@ -252,7 +271,18 @@ public class FindCameraGridFragment extends Fragment {
             //convertView.setLayoutParams(new GridView.LayoutParams((int)(220 * scale), (int)(135 * scale)));
 
             CheckedFrameLayout checkedLayout = (CheckedFrameLayout) convertView.findViewById(R.id.checked_frame);
-            checkedLayout.setChecked(isItemChecked(position));
+
+            boolean shouldBeChecked = false;
+            ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
+
+            for (CameraInfo cameraInfo : cameraInfos) {
+                if (cameraInfo.getId() == mInputInfos.get(position).inputIndex) {
+                    shouldBeChecked = true;
+                    break;
+                }
+            }
+
+            checkedLayout.setChecked(isItemChecked(position) || shouldBeChecked);
 
             ImageView imageView = (ImageView) convertView.findViewById(R.id.camera_view);
             //imageView.setImageResource(R.drawable.sample_0);

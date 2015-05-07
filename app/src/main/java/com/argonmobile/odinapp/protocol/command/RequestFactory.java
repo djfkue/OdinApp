@@ -47,7 +47,7 @@ public class RequestFactory {
         return new MoveWindowCommand(windowId, userZOrder, left, top, width, height, leftTop, rightBottom);
     }
 
-    public static Command createNewWindowRequest(short windowId) {
+    public static Command createCloseWindowRequest(short windowId) {
         return new CloseWindowCommand(windowId);
     }
 

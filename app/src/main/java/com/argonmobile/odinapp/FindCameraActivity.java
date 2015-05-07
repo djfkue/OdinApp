@@ -18,6 +18,8 @@ public class FindCameraActivity extends ActionBarActivity {
     private static final String TAG = "FindCameraActivity";
     public static final String CAMERA_INFO_LIST = "CAMERA_INFO_LIST";
 
+    public static boolean sClearInput = false;
+
     private ScaleTransformView mScaleTransformView;
     private float mScaleFactor = Float.NaN;
 
@@ -36,7 +38,11 @@ public class FindCameraActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_find_camera);
 
-        EditProfileModel.getInstance().clearCameraInfoArrayList();
+        sClearInput = getIntent().getBooleanExtra("CLEAR_INPUT", false);
+
+        if (sClearInput) {
+            EditProfileModel.getInstance().clearCameraInfoArrayList();
+        }
 
         mScaleTransformView = (ScaleTransformView)findViewById(R.id.gesture_view);
         mScaleTransformView.setOnScaleListener(new ScaleTransformView.OnScaleListener() {
@@ -60,15 +66,16 @@ public class FindCameraActivity extends ActionBarActivity {
                 }
                 if (mScaleFactor < 0.9f) {
                     Intent intent = new Intent(FindCameraActivity.this, EditProfileActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelableArrayList(CAMERA_INFO_LIST, EditProfileModel.getInstance().getCameraInfoArrayList());
+                    //Bundle bundle = new Bundle();
+                    //bundle.putParcelableArrayList(CAMERA_INFO_LIST, EditProfileModel.getInstance().getCameraInfoArrayList());
 //                    intent.putExtra(CAMERA_INFO_LIST,bundle);
-                    intent.putExtras(bundle);
+                    //intent.putExtras(bundle);
                     startActivity(intent);
 
                     // Override transitions: we don't want the normal window animation in addition
                     // to our custom one
                     overridePendingTransition(0, 0);
+                    finish();
                 }
             }
         });

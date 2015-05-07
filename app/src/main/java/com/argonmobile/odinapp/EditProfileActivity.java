@@ -28,6 +28,8 @@ public class EditProfileActivity extends ActionBarActivity {
 
     private static final String TAG = "EditProfileActivity";
 
+    public static boolean sNeedRelayout = true;
+
     private ScaleTransformView mScaleTransformView;
     private float mScaleFactor = Float.NaN;
 
@@ -45,6 +47,8 @@ public class EditProfileActivity extends ActionBarActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_edit_profile);
+
+        sNeedRelayout = getIntent().getBooleanExtra("NEED_RELAYOUT", true);
 
         mScaleTransformView = (ScaleTransformView)findViewById(R.id.gesture_view);
         mScaleTransformView.setOnScaleListener(new ScaleTransformView.OnScaleListener() {
