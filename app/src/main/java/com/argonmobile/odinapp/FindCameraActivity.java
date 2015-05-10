@@ -41,6 +41,7 @@ public class FindCameraActivity extends ActionBarActivity {
         sClearInput = getIntent().getBooleanExtra("CLEAR_INPUT", false);
 
         if (sClearInput) {
+            Log.e("TD_TRACE", "clear input infos......");
             EditProfileModel.getInstance().clearCameraInfoArrayList();
         }
 

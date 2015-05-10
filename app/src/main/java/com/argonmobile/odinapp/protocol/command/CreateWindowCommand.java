@@ -41,7 +41,9 @@ public class CreateWindowCommand extends Response {
         if(subInputs == null || url == null || recycleIndexes == null) {
             throw new IllegalStateException("Request should be init first!");
         }
-        return (short)(30 + (subInputs.length + recycleIndexes.length) * 2 + url.getBytes().length + 1);
+        //return (short)(30 + (subInputs.length + recycleIndexes.length) * 2 + url.getBytes().length + 1);
+
+        return (short)(23 + (subInputs.length) * 2 + url.getBytes().length + 1);
     }
     @Override
     public void fillPayload(ByteBuffer byteBuffer) {
@@ -63,12 +65,12 @@ public class CreateWindowCommand extends Response {
         byteBuffer.putShort(height);
         byteBuffer.putShort(leftTop);
         byteBuffer.putShort(rightBottom);
-
-        byteBuffer.put(isWindowFixed ? (byte)0x01 : (byte)0x00);
-        byteBuffer.putInt(recycleInterval);
-        byteBuffer.putShort(recycleListCount);
-        for(short recycleIndex: recycleIndexes)
-            byteBuffer.putShort(recycleIndex);
+//
+//        byteBuffer.put(isWindowFixed ? (byte)0x01 : (byte)0x00);
+//        byteBuffer.putInt(recycleInterval);
+//        byteBuffer.putShort(recycleListCount);
+//        for(short recycleIndex: recycleIndexes)
+//            byteBuffer.putShort(recycleIndex);
     }
 
     @Override

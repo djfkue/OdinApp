@@ -131,6 +131,7 @@ public class FindCameraGridFragment extends Fragment {
                 } else {
                     mInputAdapter.toggleItemChecked(position);
                     if (mInputAdapter.isItemChecked(position)) {
+                        Log.e("TD_TRACE", "add camera info......");
                         CameraInfo cameraInfo = new CameraInfo(view.getTop(),
                                 view.getLeft(),
                                 view.getWidth(),
@@ -138,6 +139,7 @@ public class FindCameraGridFragment extends Fragment {
                                 mInputInfos.get(position).inputIndex,
                                 R.drawable.sample_0);
                         EditProfileModel.getInstance().addCameraInfo(cameraInfo);
+                        Log.e("TD_TRACE", "camera info size:" + EditProfileModel.getInstance().getCameraInfoArrayList().size());
                     } else {
                         EditProfileModel.getInstance().removeCameraInfo(position);
                     }

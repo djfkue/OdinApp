@@ -129,6 +129,10 @@ public class ViewProfileFragment extends Fragment {
                 int windowWidth = windowInfo.width;
                 int windowHeight = windowInfo.height;
 
+                Log.e(TAG, "windowInfo leftTop: " + windowInfo.leftTop);
+                Log.e(TAG, "windowInfo rightBottom: " + windowInfo.rightBottom);
+
+
                 ScreenGroup screenGroup = ScreenStructure.getInstance().screenGroups[0];
                 float screenWidth = screenGroup.horizontalCount * 1920.0f;
                 float screenHeight = screenGroup.verticalCount * 1080.0f;
