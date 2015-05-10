@@ -76,6 +76,13 @@ public class EditProfileFragment extends Fragment {
 
     private ImageUpdater imageUpdater = new ImageUpdater();
 
+    private FreeProfileLayoutView.ChildScaleChangeListener mChildScaleChangeListener = new FreeProfileLayoutView.ChildScaleChangeListener() {
+        @Override
+        public void onChildScaleEnd(View view, int width, int height) {
+            syncInputWindow(view, width, height);
+        }
+    };
+
     private ArrayList<WindowInfo> mWindowInfos = new ArrayList<>();
     private Handler mHandler;
 
@@ -93,8 +100,6 @@ public class EditProfileFragment extends Fragment {
 
                 updateWindowInfos();
 
-                //gridview.setAdapter(mInputAdapter);
-                //updateInputInfoAdapter();
             }
             return true;
         }
@@ -272,6 +277,7 @@ public class EditProfileFragment extends Fragment {
         mEditProfileLayoutView = (FreeProfileLayoutView) rootView.findViewById(R.id.edit_container);
 
         mEditProfileLayoutView.setOnDragListener(mFrameDragListener);
+        mEditProfileLayoutView.setOnChildScaleChangeListener(mChildScaleChangeListener);
 
         mEditProfileLayoutView.enableGesture(true);
 
@@ -588,7 +594,7 @@ public class EditProfileFragment extends Fragment {
                         view.bringToFront();
                         view.setVisibility(View.VISIBLE);
                         //mEditProfileLayoutView.getParent().requestDisallowInterceptTouchEvent(false);
-                        syncInputWindow(view);
+                        syncInputWindow(view, view.getWidth(), view.getHeight());
                     }
 
                     break;
@@ -607,17 +613,17 @@ public class EditProfileFragment extends Fragment {
         }
     };
 
-    private void syncInputWindow(View window) {
+    private void syncInputWindow(View window, int width, int height) {
         WindowInfo windowInfo = (WindowInfo) window.getTag();
 
         ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
         short windowLeft = (short) ScaleFactorCaculator.getScreenWindowLeft((int) window.getX(), mEditProfileLayoutView.getWidth(), mEditProfileLayoutView.getHeight());
         short windowTop = (short) ScaleFactorCaculator.getScreenWindowTop((int) window.getY(), mEditProfileLayoutView.getWidth(), mEditProfileLayoutView.getHeight());
-        short windowWidth = (short) ScaleFactorCaculator.getScreenWindowWidth(window.getWidth(), mEditProfileLayoutView.getWidth(), mEditProfileLayoutView.getHeight());
-        short windowHeight = (short) ScaleFactorCaculator.getScreenWindowHeight(window.getHeight(), mEditProfileLayoutView.getWidth(), mEditProfileLayoutView.getHeight());
+        short windowWidth = (short) ScaleFactorCaculator.getScreenWindowWidth(width, mEditProfileLayoutView.getWidth(), mEditProfileLayoutView.getHeight());
+        short windowHeight = (short) ScaleFactorCaculator.getScreenWindowHeight(height, mEditProfileLayoutView.getWidth(), mEditProfileLayoutView.getHeight());
         short leftTop = (short) ((int)(window.getY() / (mCellHeight * 2) + 1) * 16 +(int) (window.getX() / (mCellWidth * 2) + 1));
 
-        short rightBottom = (short) ((int)((window.getY() + window.getHeight()) / (mCellHeight * 2) + 1) * 16 + (int)((window.getX() + window.getWidth()) / (mCellWidth * 2) + 1));;
+        short rightBottom = (short) ((int)((window.getY() + height) / (mCellHeight * 2) + 1) * 16 + (int)((window.getX() + width) / (mCellWidth * 2) + 1));;
         Log.e("TD_TRACE", "rightBottom: " + rightBottom);
 
         Log.e(TAG, "move windowTop: " + windowTop);
@@ -702,7 +708,7 @@ public class EditProfileFragment extends Fragment {
                             v.animate().translationXBy(deltaX).translationYBy(deltaY).withLayer().withEndAction(new Runnable() {
                                 @Override
                                 public void run() {
-                                    syncInputWindow(v);
+                                    syncInputWindow(v, v.getWidth(), v.getHeight());
                                 }
                             });
 
@@ -711,7 +717,7 @@ public class EditProfileFragment extends Fragment {
 
                             view.bringToFront();
                             view.setVisibility(View.VISIBLE);
-                            syncInputWindow(view);
+                            syncInputWindow(view, view.getWidth(), view.getHeight());
                         } else {
                             return false;
                         }

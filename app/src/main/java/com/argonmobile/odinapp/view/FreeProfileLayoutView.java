@@ -1,17 +1,13 @@
 package com.argonmobile.odinapp.view;
 
-import android.animation.ObjectAnimator;
 import android.content.ClipData;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.support.v4.view.MotionEventCompat;
-import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -20,9 +16,6 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 
-/**
- * TODO: document your custom view class.
- */
 public class FreeProfileLayoutView extends RelativeLayout {
     private static final String TAG = "FreeProfileLayoutView";
     private CheckedFrameLayout mCheckedView;
@@ -348,6 +341,19 @@ public class FreeProfileLayoutView extends RelativeLayout {
             mCheckedView.setX(mDestLeft);
             mCheckedView.setY(destTop);
 
+            if (mChildScaleChangeListener != null) {
+                mChildScaleChangeListener.onChildScaleEnd(mCheckedView, layoutParams.width, layoutParams.height);
+            }
         }
+    }
+
+    private ChildScaleChangeListener mChildScaleChangeListener;
+
+    public void setOnChildScaleChangeListener(ChildScaleChangeListener childScaleChangeListener) {
+        mChildScaleChangeListener = childScaleChangeListener;
+    }
+
+    public interface ChildScaleChangeListener {
+        public void onChildScaleEnd(View view, int width, int height);
     }
 }
