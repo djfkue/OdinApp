@@ -172,14 +172,14 @@ public class FindCameraGridFragment extends Fragment {
             }
             ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
             con.removeCommandListener(commandListener);
-            {
-                List<WindowInfo> windowInfos = WindowInfoModel.getInstance().windowInfos;
-                for (WindowInfo windowInfo : windowInfos) {
-                    Log.e("TD_TRACE", "send close window request");
-                    Command req = RequestFactory.createCloseWindowRequest(windowInfo.windowId);
-                    con.sendCommand(req);
-                }
-            }
+//            {
+//                List<WindowInfo> windowInfos = WindowInfoModel.getInstance().windowInfos;
+//                for (WindowInfo windowInfo : windowInfos) {
+//                    Log.e("TD_TRACE", "send close window request");
+//                    Command req = RequestFactory.createCloseWindowRequest(windowInfo.windowId);
+//                    con.sendCommand(req);
+//                }
+//            }
         }
     }
 
@@ -288,7 +288,7 @@ public class FindCameraGridFragment extends Fragment {
             //imageView.setImageResource(R.drawable.sample_0);
             imageUpdater.subscribe(mInputInfos.get(position).inputIndex, imageView);
             ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
-                    (short)480, (short)270, new byte[]{(byte) mInputInfos.get(position).inputIndex});
+                    (short)240, (short)180, new byte[]{(byte) mInputInfos.get(position).inputIndex});
             return convertView;
         }
     }

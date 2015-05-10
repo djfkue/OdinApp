@@ -48,7 +48,7 @@ public class ImageProcessor extends IState implements CommandListener {
             Log.i(TAG, "before decode bitmap");
             long start = System.currentTimeMillis();
             BitmapFactory.Options options = new BitmapFactory.Options();
-            //options.inPreferredConfig = Bitmap.Config.RGB_565;
+            options.inPreferredConfig = Bitmap.Config.RGB_565;
             Bitmap bitmap = BitmapFactory.decodeByteArray(packet.imageData, 0, packet.imageData.length, options);
             Log.i(TAG, "after decode bitmap, cost:" + (System.currentTimeMillis() - start) + "ms");
             handler.sendMessage(handler.obtainMessage(MSG_ON_REC_IMAGE, packet.imageOrPlanIndex, 0, bitmap));
@@ -92,13 +92,17 @@ public class ImageProcessor extends IState implements CommandListener {
             if(responses == null) {
                 responses = new ArrayList<JpgResponse>();
             }
+            // clear responses when receive first image packet
+            if(response.index == 0) {
+                responses.clear();
+            }
             responses.add(response);
             responseArrays.put(key, responses);
             Log.i(TAG, "after put rarraysize:" + responseArrays.size());
 
             if(response.totalCount == responses.size()) {
                 packImage(responses);
-                responseArrays.removeAt(key);
+                responseArrays.remove(key);
                 Log.i(TAG, "after remove ----> array size:" + responseArrays.size());
             }
         }

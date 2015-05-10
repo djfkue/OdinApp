@@ -57,7 +57,7 @@ public class ImageUpdater {
                 }
             }
             if(imageViews.size() == 0) {
-                imageViewMap.removeAt(planOrSignalIndex);
+                imageViewMap.remove(planOrSignalIndex);
             }
         }
     }
@@ -67,7 +67,8 @@ public class ImageUpdater {
         synchronized (imageViewMap) {
             imageViews = imageViewMap.get(planOrSignalIndex);
             if(imageViews == null || imageViews.size() == 0) {
-                imageViewMap.removeAt(planOrSignalIndex);
+                imageViewMap.remove(planOrSignalIndex);
+                //imageViewMap.removeAt(planOrSignalIndex);
                 bitmap.recycle();
             } else {
                 boolean usingImage = false;
@@ -78,7 +79,7 @@ public class ImageUpdater {
                     }
                 }
                 if(!usingImage) {
-                    imageViewMap.removeAt(planOrSignalIndex);
+                    imageViewMap.remove(planOrSignalIndex);
                     bitmap.recycle();
                 }
             }

@@ -431,9 +431,10 @@ public class EditProfileFragment extends Fragment {
                 req.inputIndex = (short) cameraInfo.getId();
                 req.userZOrder = (short) i;
                 req.input = (short) cameraInfo.getId();
-                req.divideMode = 0;
-                req.subInputs = new short[0];
-                req.url = "tmp";
+                req.divideMode = 1;
+                req.subInputs = new short[1];
+                req.subInputs[0] = 0;
+                req.url = "";
                 req.panelGroupId = 0;
                 req.left = (short) cameraInfo.mLeft;
                 req.top = (short) cameraInfo.mTop;
@@ -441,6 +442,7 @@ public class EditProfileFragment extends Fragment {
                 req.height = (short) cameraInfo.mHeight;
                 req.leftTop = (short) cameraInfo.mLeft;
                 req.rightBottom = (short) (cameraInfo.mLeft + cameraInfo.mWidth);
+                req.isWindowFixed = false;
                 con.sendCommand(req);
             }
         }

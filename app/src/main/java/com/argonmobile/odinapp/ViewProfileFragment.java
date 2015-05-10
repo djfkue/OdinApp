@@ -177,7 +177,7 @@ public class ViewProfileFragment extends Fragment {
 
                 imageUpdater.subscribe(windowInfo.inputIndex, imageView);
                 ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
-                        (short) 240, (short) 180, new byte[]{(byte) windowInfo.inputIndex});
+                        (short) 480, (short) 270, new byte[]{(byte) windowInfo.inputIndex});
 
                 CameraInfo cameraInfo = new CameraInfo(deviceWindowTop,
                         deviceWindowLeft,
@@ -316,6 +316,8 @@ public class ViewProfileFragment extends Fragment {
                         layoutParams.width = width;
                         mEditProfileLayoutView.setLayoutParams(layoutParams);
                         mEditProfileLayoutView.postInvalidate();
+                        updateWindowInfos();
+
                         return true;
                     }
                 });
@@ -323,6 +325,18 @@ public class ViewProfileFragment extends Fragment {
         }
 
         return mRootView;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+        con.addCommandListener(commandListener);
+        {
+            Request req = RequestFactory.createGetPlanWindowListRequest();
+            con.sendCommand(req);
+        }
     }
 /*
     private void createProfileLayout() {
@@ -428,13 +442,15 @@ public class ViewProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        updateWindowInfos();
+        //updateWindowInfos();
     }
 
     @Override
-    public void onStop () {
-        super.onStop();
+    public void onPause () {
+        super.onPause();
+
         for (WindowInfo windowInfo : mWindowInfos) {
+            Log.e(TAG, "stopJpgTransport............");
             ConnectionManager.defaultManager.stopJpgTransport(new byte[]{(byte) windowInfo.inputIndex});
         }
 
