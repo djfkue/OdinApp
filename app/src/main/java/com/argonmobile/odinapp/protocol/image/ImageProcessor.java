@@ -119,6 +119,13 @@ public class ImageProcessor extends IState implements CommandListener {
                 return ImageProcessor.compare(lhs.index, rhs.index);
             }
         });
+
+        for(int index = 0; index < responses.size(); ++index) {
+            if(index != responses.get(index).index) {
+                Log.i(TAG, "image packet has been tainted!");
+                return;
+            }
+        }
         // then we repack the jpg data
         int jpgDataLength = 0;
         for(JpgResponse response: responses) {
