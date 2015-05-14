@@ -6,7 +6,7 @@ import java.nio.charset.Charset;
 /**
  * Created by sean on 4/16/15.
  */
-public class CreateWindowCommand extends Response {
+public class CreateWindowRequest extends Request {
     public short windowId;
     public short inputIndex;
     public short userZOrder;
@@ -23,16 +23,9 @@ public class CreateWindowCommand extends Response {
     public short recycleListCount;
     public short[] recycleIndexes;
 
-    public CreateWindowCommand() {
+    public CreateWindowRequest() {
         this.command = CommandDefs.CMD_CREATE_NEW_WINDOW;
     }
-
-    public static Response.Creator sCreator = new Response.Creator() {
-        @Override
-        public Response createInstance() {
-            return new CreateWindowCommand();
-        }
-    };
 
     // TODO: add helper interface to init all the parameters
 
@@ -41,9 +34,9 @@ public class CreateWindowCommand extends Response {
         if(subInputs == null || url == null || recycleIndexes == null) {
             throw new IllegalStateException("Request should be init first!");
         }
-        return (short)(30 + (subInputs.length + recycleIndexes.length) * 2 + url.getBytes().length + 1);
+        //return (short)(30 + (subInputs.length + recycleIndexes.length) * 2 + url.getBytes().length + 1);
 
-        //return (short)(23 + (subInputs.length) * 2 + url.getBytes().length + 1);
+        return (short)(23 + (subInputs.length) * 2 + url.getBytes().length + 1);
     }
     @Override
     public void fillPayload(ByteBuffer byteBuffer) {
@@ -55,7 +48,7 @@ public class CreateWindowCommand extends Response {
         for(short subInput: subInputs)
             byteBuffer.putShort(subInput);
         // put url
-        byteBuffer.put(url.getBytes());
+        //byteBuffer.put(url.getBytes());
         byteBuffer.put((byte) '\0');
 
         byteBuffer.putShort(panelGroupId);
@@ -66,11 +59,11 @@ public class CreateWindowCommand extends Response {
         byteBuffer.putShort(leftTop);
         byteBuffer.putShort(rightBottom);
 
-        byteBuffer.put(isWindowFixed ? (byte)0x01 : (byte)0x00);
-        byteBuffer.putInt(recycleInterval);
-        byteBuffer.putShort(recycleListCount);
-        for(short recycleIndex: recycleIndexes)
-            byteBuffer.putShort(recycleIndex);
+        byteBuffer.put(isWindowFixed ? (byte) 0x01 : (byte) 0x00);
+//        byteBuffer.putInt(recycleInterval);
+//        byteBuffer.putShort(recycleListCount);
+//        for(short recycleIndex: recycleIndexes)
+//            byteBuffer.putShort(recycleIndex);
     }
 
     @Override

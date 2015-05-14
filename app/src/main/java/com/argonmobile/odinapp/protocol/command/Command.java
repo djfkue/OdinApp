@@ -38,6 +38,7 @@ public abstract class Command {
         bb.putShort(length);
         // put command
         bb.put(command);
+        Log.e(TAG, "get cmd: " + command + " with length: " + length);
         // put command parameters
         fillPayload(bb);
         // put checksum

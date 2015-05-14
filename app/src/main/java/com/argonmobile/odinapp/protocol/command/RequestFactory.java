@@ -39,7 +39,7 @@ public class RequestFactory {
     }
 
     public static Command createNewWindowRequest() {
-        return new CreateWindowCommand();
+        return new CreateWindowRequest();
     }
 
     public static Command createMoveWindowRequest(short windowId, short userZOrder, short left, short top,

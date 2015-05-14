@@ -33,6 +33,7 @@ import com.argonmobile.odinapp.model.WindowInfoModel;
 import com.argonmobile.odinapp.protocol.command.CloseWindowCommand;
 import com.argonmobile.odinapp.protocol.command.Command;
 import com.argonmobile.odinapp.protocol.command.CreateWindowCommand;
+import com.argonmobile.odinapp.protocol.command.CreateWindowRequest;
 import com.argonmobile.odinapp.protocol.command.GetPlanWindowListResponse;
 import com.argonmobile.odinapp.protocol.command.MoveWindowCommand;
 import com.argonmobile.odinapp.protocol.command.Request;
@@ -214,7 +215,7 @@ public class EditProfileFragment extends Fragment {
     CommandListener commandListener = new CommandListener() {
         @Override
         public void onSentCommand(Command cmd) {
-            Log.i(TAG, "onSentCommand:" + cmd.command);
+            Log.i(TAG, "onSentCommand:" + cmd.command + " command payload length: " + cmd.getPayloadLength() + " cmd length: " + cmd.length);
         }
 
         @Override
@@ -441,11 +442,11 @@ public class EditProfileFragment extends Fragment {
 
             for (int i = 0; i < cameraInfos.size(); i++) {
                 CameraInfo cameraInfo = cameraInfos.get(i);
-                CreateWindowCommand req = (CreateWindowCommand) RequestFactory.createNewWindowRequest();
+                CreateWindowRequest req = (CreateWindowRequest) RequestFactory.createNewWindowRequest();
                 req.windowId = (short) i;
                 req.inputIndex = (short) cameraInfo.getId();
                 req.userZOrder = (short) i;
-                req.input = (short) cameraInfo.getId();
+                req.input = (byte) cameraInfo.getId();
                 req.divideMode = 1;
                 req.subInputs = new short[1];
                 req.subInputs[0] = 0;
@@ -467,8 +468,9 @@ public class EditProfileFragment extends Fragment {
 
                 req.isWindowFixed = false;
                 req.recycleInterval = 0;
-                req.recycleListCount = 0;
-                req.recycleIndexes = new short[0];
+                req.recycleListCount = 1;
+                req.recycleIndexes = new short[1];
+                req.recycleIndexes[0] = 0;
                 con.sendCommand(req);
             }
         }
@@ -615,6 +617,8 @@ public class EditProfileFragment extends Fragment {
 
     private void syncInputWindow(View window, int width, int height) {
         WindowInfo windowInfo = (WindowInfo) window.getTag();
+
+        Log.e(TAG, "sync input window: " + windowInfo.windowId);
 
         ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
         short windowLeft = (short) ScaleFactorCaculator.getScreenWindowLeft((int) window.getX(), mEditProfileLayoutView.getWidth(), mEditProfileLayoutView.getHeight());
