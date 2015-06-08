@@ -59,6 +59,7 @@ public class GetPlanListResponse extends Response {
             PlanInfo planInfo = new PlanInfo();
             //load info
             planInfo.index = byteBuffer.get();
+            planInfo.frequency = byteBuffer.getInt();
             int planNameLength = byteBuffer.get();;
             byte[] nameByte = new byte[planNameLength];
             byteBuffer.get(nameByte);

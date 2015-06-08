@@ -5,12 +5,13 @@ package com.argonmobile.odinapp.protocol.deviceinfo;
  */
 public class PlanInfo {
     public int index;
+    public int frequency;
     public String planName;
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("index:").append(index).append(" planName:").append(planName);
+        sb.append("index:").append(index).append(" planName:").append(planName).append(", frequency:").append(frequency);
         return sb.toString();
     }
 }
