@@ -12,7 +12,7 @@ public class WindowInfo {
     public short userZOrder;
     public byte input;
     public byte divideMode;
-    public short[] subInputs;
+    public String[] subInputs;
     public String url;
     public short panelGroupId;
     public short left, top;
@@ -33,9 +33,22 @@ public class WindowInfo {
         divideMode = bb.get();
 
         int subInputCount = divideMode & 0x000000FF;
-        subInputs = new short[subInputCount];
+        subInputs = new String[subInputCount];
+        int readCountForSubinputs = 0;
         for(int index = 0; index < subInputCount; ++index) {
-            subInputs[index] = bb.getShort();
+            byte[] subInputBuf = new byte[256];
+            byte singleChar;
+            int charIndex = 0;
+
+            do {
+                singleChar = bb.get();
+                ++readCountForSubinputs;
+                if(singleChar != '\0')
+                    subInputBuf[charIndex++] = singleChar;
+                else
+                    break;
+            } while(true);
+            subInputs[index] = new String(subInputBuf, 0, charIndex, Charset.forName("UTF-8"));
         }
 
         // read url
@@ -71,7 +84,7 @@ public class WindowInfo {
             recycleIndexes[index] = bb.getShort();
         }*/
 
-        readLength += 22 + subInputs.length * 2 + readCount;
+        readLength += 22 + readCountForSubinputs + readCount;
         return readLength;
     }
 }
