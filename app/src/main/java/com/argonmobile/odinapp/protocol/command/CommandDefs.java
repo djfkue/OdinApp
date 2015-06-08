@@ -64,4 +64,9 @@ public final class CommandDefs {
     public final static byte PARAM_BALL_ZOOM_OUT = 0x06;
 
 
+    /*
+     * input type
+     */
+    public final static byte PARAM_INPUT_TYPE_IP = 0x10;
+    public final static byte PARAM_INPUT_TYPE_AV = 0x20;
 }

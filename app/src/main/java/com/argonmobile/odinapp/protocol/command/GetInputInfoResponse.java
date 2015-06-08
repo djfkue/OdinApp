@@ -59,6 +59,7 @@ public class GetInputInfoResponse extends Response {
             InputInfo inputInfo = new InputInfo();
             //load info
             inputInfo.inputIndex = byteBuffer.get();
+            inputInfo.frequency = byteBuffer.getInt();
             inputInfo.portInputIndex = byteBuffer.get();
             inputInfo.inputType = byteBuffer.get();
             // get input name
