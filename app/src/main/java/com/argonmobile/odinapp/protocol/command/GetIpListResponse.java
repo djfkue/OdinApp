@@ -1,7 +1,12 @@
 package com.argonmobile.odinapp.protocol.command;
 
 
+import com.argonmobile.odinapp.protocol.IPCameraParser;
+import com.argonmobile.odinapp.protocol.deviceinfo.IPCameraNode;
+import com.argonmobile.odinapp.protocol.deviceinfo.Node;
+
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,6 +16,8 @@ public class GetIpListResponse extends Response {
     public int totalCount;
     public int index;
     public byte[] data;
+    public Node rootNode;
+    public ArrayList<IPCameraNode> ipCameraNodes;
     private GetIpListResponse() {}
 
     public static Creator sCreator = new Creator() {
@@ -39,6 +46,15 @@ public class GetIpListResponse extends Response {
                 offset += sr.data.length;
             }
             firstResponse.data = tmpData;
+
+            // parse node here
+            firstResponse.ipCameraNodes = new ArrayList<IPCameraNode>();
+            try {
+                String ipCamInfo = new String(tmpData, "UTF-8");
+                firstResponse.rootNode = IPCameraParser.parserIPCameras(ipCamInfo, firstResponse.ipCameraNodes);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
             return firstResponse;
         }
         @Override

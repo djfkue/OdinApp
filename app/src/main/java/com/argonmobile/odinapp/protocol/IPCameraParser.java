@@ -9,6 +9,7 @@ import com.argonmobile.odinapp.protocol.deviceinfo.Node;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 
 /**
  * Created by sean on 5/22/15.
@@ -21,7 +22,7 @@ public class IPCameraParser {
     private final static String ATTR_TYPE_IPC = "IPC";
     private final static String ATTR_TYPE_SUBIPC = "SUBIPC";
 
-    public static Node parserIPCameras(String ipCameraInfo) {
+    public static Node parserIPCameras(String ipCameraInfo, ArrayList<IPCameraNode> cameraNodes) {
         int event;
         String type;
         Node rootNode = new Node("root", "root", false, null);
@@ -45,9 +46,12 @@ public class IPCameraParser {
 
                 Node child = null;
                 if(type.equals(ATTR_TYPE_FOLDER)) {
-                    child = parseLocationNode(parser, rootNode);
+                    child = parseLocationNode(parser, rootNode, cameraNodes);
                 } else if(type.equals(ATTR_TYPE_IPC)) {
                     child = parseIpCameraNode(parser, rootNode);
+                    if(child != null) {
+                        cameraNodes.add((IPCameraNode)child);
+                    }
                 }
                 if(child != null) {
                     rootNode.addChildNode(child);
@@ -61,7 +65,7 @@ public class IPCameraParser {
         return rootNode;
     }
 
-    private static Node parseLocationNode(XmlPullParser parser, Node parentNode) throws Exception {
+    private static Node parseLocationNode(XmlPullParser parser, Node parentNode, ArrayList<IPCameraNode> cameraNodes) throws Exception {
         int event = parser.getEventType();
         if(event != XmlPullParser.START_TAG) throw new IllegalStateException("init event type must be START_TAG");
         String location = parser.getName();
@@ -75,9 +79,12 @@ public class IPCameraParser {
                 String type = parser.getAttributeValue(null, ATTR_NAME_TYPE);
                 Node child = null;
                 if(type.equals(ATTR_TYPE_FOLDER)) {
-                    child = parseLocationNode(parser, node);
+                    child = parseLocationNode(parser, node, cameraNodes);
                 } else if(type.equals(ATTR_TYPE_IPC)) {
                     child = parseIpCameraNode(parser, node);
+                    if(child != null) {
+                        cameraNodes.add((IPCameraNode)child);
+                    }
                 }
                 if(child != null) {
                     node.addChildNode(child);
@@ -88,7 +95,7 @@ public class IPCameraParser {
         return node;
     }
 
-    private static Node parseIpCameraNode(XmlPullParser parser, Node parentNode) throws Exception {
+    private static IPCameraNode parseIpCameraNode(XmlPullParser parser, Node parentNode) throws Exception {
         int event = parser.getEventType();
         if(event != XmlPullParser.START_TAG) throw new IllegalStateException("init event type must be START_TAG");
         String location = parser.getName();
