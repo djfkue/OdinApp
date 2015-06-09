@@ -17,6 +17,7 @@ public class ResponseRepacker {
         REPACKER_MAP.put(CommandDefs.CMD_GET_PLAN_LIST, GetPlanListResponse.sRepacker);
         REPACKER_MAP.put(CommandDefs.CMD_GET_PLAN_WINDOW_INFO, GetPlanWindowInfoResponse.sRepacker);
         REPACKER_MAP.put(CommandDefs.CMD_GET_PLAN_WINDOW_LIST, GetPlanWindowListResponse.sRepacker);
+        REPACKER_MAP.put(CommandDefs.CMD_GET_IP_LIST, GetIpListResponse.sRepacker);
     }
 
     private SparseArray<ArrayList<Response>> subPacketMap = new SparseArray<ArrayList<Response>>();
