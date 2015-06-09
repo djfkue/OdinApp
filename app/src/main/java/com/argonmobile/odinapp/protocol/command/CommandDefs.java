@@ -42,7 +42,7 @@ public final class CommandDefs {
 
     public final static byte CMD_DEV_CTRL_BALL = 0x70;
 
-    public final static byte CMD_FACE_DETECTION = (byte)0x80;
+    public final static byte CMD_CATCH_ESCAPE = (byte)0x80;
 
     //public final static byte CMD_TRANSFER_JPG = (byte)0x81;
 

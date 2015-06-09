@@ -5,7 +5,9 @@ package com.argonmobile.odinapp.protocol.command;
  * Created by sean on 4/8/15.
  */
 public class RequestFactory {
-    private RequestFactory() {}
+    private RequestFactory() {
+    }
+
     public static Request createServiceDiscoverRequest(String ipAddress, int port) {
         return new ServiceDiscoverRequest(ipAddress, port);
     }
@@ -62,5 +64,9 @@ public class RequestFactory {
 
     public static Request createControlBallRequest(byte direction, byte offset) {
         return new CtrlBallRequest(direction, offset);
+    }
+
+    public static Request createCatchEscapeRequest(String input) {
+        return new CatchEscapeRequest(input);
     }
 }
