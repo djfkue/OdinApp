@@ -17,7 +17,12 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.argonmobile.odinapp.protocol.IPCameraParser;
+import com.argonmobile.odinapp.protocol.deviceinfo.IPCameraNode;
+import com.argonmobile.odinapp.protocol.deviceinfo.Node;
 import com.argonmobile.odinapp.view.WheelWidget;
+
+import java.util.ArrayList;
 
 
 /**
@@ -25,30 +30,24 @@ import com.argonmobile.odinapp.view.WheelWidget;
  */
 public class SearchCameraFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener {
 
-    private final static int LEVEL_DISTRICT = 0;
-    private final static int LEVEL_STREET = 1;
-
-    private String[] mLocation_streets = new String[] {
-            "", "", "", "",
-            "天元西路", "龙眠大道", "宏图上水园", "清水停东路", "天地新城天蝎座", "软件大道18号", "将军大道56号", "学院路", "仙林大道",
-            "", "", "", ""
-    };
-    private String[] mLocation_districts = new String[] {
-            "", "", "", "",
-            "建邺区", "栖霞区", "鼓楼区", "白下区", "浦口区", "雨花区", "江宁区", "雨花区", "玄武区", "六合区", "秦淮区",
-            "", "", "", ""
-    };
-
     private WheelWidget mWheel;
     private MyAdapter myAdapter;
 
+    // for mock only
+    private Node mRootNode;
+    private Node mCurrentNode;
+
     public SearchCameraFragment() {
         // Required empty public constructor
+        // TODO: get ip camera info
+        String ipCameraInfo = "<IPCLists><雨花区 Name=\"T130758898957037250\" Type=\"Folder\"><板桥派出所 Name=\"T130758899048902505\" Type=\"Folder\"><凤台南路 Name=\"T130758899147408139\" Type=\"Folder\"><XX路口 Name=\"T130758899260354599\" Type=\"Folder\"><监控摄像机1 Name=\"T130758899418983672\" Type=\"IPC\"><IP地址 Name=\"T130758899530720063\" Type=\"SUBIPC\" /><用户名 Name=\"T130758899626645550\" Type=\"SUBIPC\" /><密码 Name=\"T130758899674258273\" Type=\"SUBIPC\" /><端口 Name=\"T130758899725821222\" Type=\"SUBIPC\" /></监控摄像机1></XX路口></凤台南路></板桥派出所><软件园派出所 Name=\"T130758899850548356\" Type=\"Folder\" /></雨花区></IPCLists>";
+        ArrayList<IPCameraNode> cameraNodes = new ArrayList<IPCameraNode>();
+        mRootNode = IPCameraParser.parserIPCameras(ipCameraInfo, cameraNodes);
+        mCurrentNode = mRootNode;
     }
 
 
     TextView currentSelection, fakeSelection;
-    int mCurrentLevel;
     int stackedPos;
 
     @Override
@@ -61,8 +60,7 @@ public class SearchCameraFragment extends Fragment implements View.OnClickListen
         currentSelection = (TextView) rootView.findViewById(R.id.current_selection);
         currentSelection.setOnClickListener(this);
         fakeSelection = (TextView) rootView.findViewById(R.id.fake_selection);
-        mCurrentLevel = LEVEL_DISTRICT;
-        myAdapter = new MyAdapter(getActivity(), getActivity().getLayoutInflater(), mLocation_districts);
+        myAdapter = new MyAdapter(getActivity(), getActivity().getLayoutInflater());
         mWheel.setAdapter(myAdapter);
         mWheel.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -115,30 +113,25 @@ public class SearchCameraFragment extends Fragment implements View.OnClickListen
         return rootView;
     }
 
-    private class MyAdapter extends BaseAdapter   {
-        private String[] data;
+    private class MyAdapter extends BaseAdapter {
         private Context ctx;
         private LayoutInflater mInflater;
-        public MyAdapter(Context context, LayoutInflater inflater, String[] data)
+        public MyAdapter(Context context, LayoutInflater inflater)//, String[] data)
         {
             ctx = context;
             mInflater = inflater;
-            this.data = data;
-        }
-        public void updateData(String[] data) {
-            this.data = data;
-            this.notifyDataSetChanged();
         }
         @Override
         public int getCount() {
             // How many items are in the data set represented by this Adapter.(在此适配器中所代表的数据集中的条目数)
-            return data.length;
+            return (mCurrentNode != null) ? (mCurrentNode.mChildNodes.size() + 8) : 0;
         }
 
         @Override
         public Object getItem(int position) {
             // Get the data item associated with the specified position in the data set.(获取数据集中与指定索引对应的数据项)
-            return data[position];
+            if(position < 4 || position >= (getCount() - 4)) return null;
+            return (mCurrentNode != null) ? mCurrentNode.mChildNodes.values().toArray()[position - 4] : null;
         }
 
         @Override
@@ -149,7 +142,8 @@ public class SearchCameraFragment extends Fragment implements View.OnClickListen
 
         @Override
         public boolean isEnabled(int position) {
-            return true;//(mWheel.getEnabledItemIndex() == position) ? true : false;
+            Node item = (Node)getItem(position);
+            return item != null && !item.mIsLeafNode;
         }
 
         @Override
@@ -160,7 +154,8 @@ public class SearchCameraFragment extends Fragment implements View.OnClickListen
                 view = mInflater.inflate(R.layout.wheel_item_2, parent, false);
             }
             TextView content = (TextView) view.findViewById(R.id.content);
-            content.setText(data[position]);
+            Node item = (Node)getItem(position);
+            content.setText(item != null ? item.mDisplayName : null);
             return view;
         }
 
@@ -168,11 +163,10 @@ public class SearchCameraFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onClick(View view) {
-        if(mCurrentLevel == LEVEL_STREET) {
+        if((mCurrentNode!= null) && (mRootNode != null) && (mCurrentNode != mRootNode)) {
             {
                 fakeSelection.setText(currentSelection.getText());
                 fakeSelection.setVisibility(View.VISIBLE);
-                currentSelection.setText(null);
                 AnimatorSet set = new AnimatorSet();
                 set.playTogether(ObjectAnimator.ofFloat(fakeSelection, "translationX",
                                 currentSelection.getLeft() - fakeSelection.getLeft(), 0F),
@@ -206,8 +200,9 @@ public class SearchCameraFragment extends Fragment implements View.OnClickListen
                     }
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        myAdapter.updateData(mLocation_districts);
-                        mCurrentLevel = LEVEL_DISTRICT;
+                        mCurrentNode = mCurrentNode.mParentNode.get();
+                        currentSelection.setText(mCurrentNode != mRootNode ? mCurrentNode.mDisplayName : null);
+                        myAdapter.notifyDataSetChanged();
                         mWheel.setSelection(stackedPos - 4);
                         ObjectAnimator anim = ObjectAnimator.ofFloat(mWheel, "alpha",
                                 0f, 1.0f);
@@ -228,10 +223,11 @@ public class SearchCameraFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if(mCurrentLevel == LEVEL_DISTRICT) {
+        final Node item = (Node)myAdapter.getItem(position);
+        if(item != null && !item.mIsLeafNode) {
             stackedPos = position;
             {
-                fakeSelection.setText(mLocation_districts[position]);
+                fakeSelection.setText(item.mDisplayName);
                 fakeSelection.setVisibility(View.VISIBLE);
                 Log.i("xx", "fakeSelection.getTop():" + fakeSelection.getTop());
                 AnimatorSet set = new AnimatorSet();
@@ -246,7 +242,7 @@ public class SearchCameraFragment extends Fragment implements View.OnClickListen
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         fakeSelection.setVisibility(View.INVISIBLE);
-                        currentSelection.setText(mLocation_districts[stackedPos]);
+                        currentSelection.setText(item != mRootNode ? item.mDisplayName : null);
                     }
                     @Override
                     public void onAnimationCancel(Animator animation) {
@@ -265,18 +261,21 @@ public class SearchCameraFragment extends Fragment implements View.OnClickListen
                     @Override
                     public void onAnimationStart(Animator animation) {
                     }
+
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        myAdapter.updateData(mLocation_streets);
-                        mCurrentLevel = LEVEL_STREET;
+                        mCurrentNode = item;
+                        myAdapter.notifyDataSetChanged();
                         ObjectAnimator anim = ObjectAnimator.ofFloat(mWheel, "alpha",
                                 0f, 1.0f);
                         anim.setDuration(200);
                         anim.start();
                     }
+
                     @Override
                     public void onAnimationCancel(Animator animation) {
                     }
+
                     @Override
                     public void onAnimationRepeat(Animator animation) {
                     }
