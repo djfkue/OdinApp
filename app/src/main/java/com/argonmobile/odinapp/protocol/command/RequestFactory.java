@@ -32,8 +32,8 @@ public class RequestFactory {
         return new CommandOnlyRequest(CommandDefs.CMD_GET_PLAN_LIST);
     }
 
-    public static Request createGetPlanWindowInfoRequest() {
-        return new CommandOnlyRequest(CommandDefs.CMD_GET_PLAN_WINDOW_INFO);
+    public static Request createGetPlanWindowInfoRequest(int planIndex) {
+        return new GetPlanWindowInfoRequest(planIndex);
     }
 
     public static Request createGetPlanWindowListRequest() {
