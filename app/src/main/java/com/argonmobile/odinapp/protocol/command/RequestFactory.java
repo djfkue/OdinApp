@@ -69,4 +69,8 @@ public class RequestFactory {
     public static Request createCatchEscapeRequest(String input) {
         return new CatchEscapeRequest(input);
     }
+
+    public static Request createInvokePlanRequest(int planIndex) {
+        return new SwitchPlanRequest(planIndex);
+    }
 }
