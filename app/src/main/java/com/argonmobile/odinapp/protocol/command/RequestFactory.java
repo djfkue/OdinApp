@@ -73,4 +73,8 @@ public class RequestFactory {
     public static Request createInvokePlanRequest(int planIndex) {
         return new SwitchPlanRequest(planIndex);
     }
+
+    public static Request createNewPlanRequest(int planIndex, String planName) {
+        return new NewPlanRequest(planIndex, planName);
+    }
 }
