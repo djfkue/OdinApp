@@ -36,19 +36,27 @@ public class WindowInfo {
         subInputs = new String[subInputCount];
         int readCountForSubinputs = 0;
         for(int index = 0; index < subInputCount; ++index) {
-            byte[] subInputBuf = new byte[256];
+            byte[] subInputBuf = new byte[128];
             byte singleChar;
             int charIndex = 0;
 
             do {
                 singleChar = bb.get();
                 ++readCountForSubinputs;
-                if(singleChar != '\0')
+                if(singleChar != '\0') {
                     subInputBuf[charIndex++] = singleChar;
-                else
+                    if(charIndex == 1 && singleChar == (byte)0) {
+                        break;
+                    }
+                } else {
                     break;
+                }
             } while(true);
-            subInputs[index] = new String(subInputBuf, 0, charIndex, Charset.forName("UTF-8"));
+            if(charIndex == 1 && subInputBuf[0] == (byte)0) {
+                subInputs[index] = null;
+            } else {
+                subInputs[index] = new String(subInputBuf, 0, charIndex, Charset.forName("UTF-8"));
+            }
         }
 
         // read url
