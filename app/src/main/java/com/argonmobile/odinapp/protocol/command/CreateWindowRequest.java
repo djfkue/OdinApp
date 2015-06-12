@@ -1,7 +1,6 @@
 package com.argonmobile.odinapp.protocol.command;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 /**
  * Created by sean on 4/16/15.
@@ -13,6 +12,7 @@ public class CreateWindowRequest extends Request {
     public byte input;
     public byte divideMode;
     public short[] subInputs;
+    public String[] subInputss;
     public String url;
     public short panelGroupId;
     public short left, top;
@@ -35,8 +35,11 @@ public class CreateWindowRequest extends Request {
             throw new IllegalStateException("Request should be init first!");
         }
         //return (short)(30 + (subInputs.length + recycleIndexes.length) * 2 + url.getBytes().length + 1);
-
-        return (short)(23 + (subInputs.length) * 2 + url.getBytes().length + 1);
+        int subinputLength = 0;
+        for(String subinput : subInputss) {
+            subinputLength += (subinput == null) ? 1 : (subinput.getBytes().length + 1);
+        }
+        return (short)(23 + /*(subInputs.length) * 2*/subinputLength + url.getBytes().length + 1);
     }
     @Override
     public void fillPayload(ByteBuffer byteBuffer) {
@@ -45,8 +48,16 @@ public class CreateWindowRequest extends Request {
         byteBuffer.putShort(userZOrder);
         byteBuffer.put(input);
         byteBuffer.put(divideMode);
-        for(short subInput: subInputs)
-            byteBuffer.putShort(subInput);
+        //for(short subInput: subInputs)
+            //byteBuffer.putShort(subInput);
+        for(String subInput : subInputss) {
+            if(subInput == null) {
+                byteBuffer.put((byte)0);
+            } else {
+                byteBuffer.put(subInput.getBytes());
+                byteBuffer.put((byte) '\0');
+            }
+        }
         // put url
         //byteBuffer.put(url.getBytes());
         byteBuffer.put((byte) '\0');
@@ -66,6 +77,7 @@ public class CreateWindowRequest extends Request {
 //            byteBuffer.putShort(recycleIndex);
     }
 
+    /*
     @Override
     public void parsePayload(ByteBuffer byteBuffer, int payloadLength) {
         // TODO: to be implemented
@@ -116,5 +128,5 @@ public class CreateWindowRequest extends Request {
 //            recycleIndex = byteBuffer.getShort();
 //        }
 
-    }
+    }*/
 }

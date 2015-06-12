@@ -13,6 +13,7 @@ public class CreateWindowCommand extends Response {
     public byte input;
     public byte divideMode;
     public short[] subInputs;
+    public String[] subInputss;
     public String url;
     public short panelGroupId;
     public short left, top;
@@ -36,6 +37,7 @@ public class CreateWindowCommand extends Response {
 
     // TODO: add helper interface to init all the parameters
 
+    /*
     @Override
     public short getPayloadLength() {
         if(subInputs == null || url == null || recycleIndexes == null) {
@@ -71,7 +73,7 @@ public class CreateWindowCommand extends Response {
         byteBuffer.putShort(recycleListCount);
         for(short recycleIndex: recycleIndexes)
             byteBuffer.putShort(recycleIndex);
-    }
+    }*/
 
     @Override
     public void parsePayload(ByteBuffer byteBuffer, int payloadLength) {
@@ -82,10 +84,28 @@ public class CreateWindowCommand extends Response {
         userZOrder = byteBuffer.getShort();
         input = byteBuffer.get();
         divideMode = byteBuffer.get();
-        subInputs = new short[divideMode];
+        //subInputs = new short[divideMode];
+        subInputss = new String[divideMode];
         for (int index = 0; index < divideMode; ++index) {
-            subInputs[index] = byteBuffer.getShort();
+            byte singleChar;
+            singleChar = byteBuffer.get();
+            if(singleChar == (byte)0) {
+                subInputss[index] = null;
+                continue;
+            }
+            byte[] subInputBuffer = new byte[128];
+            int charIndex = 0;
+            while(true) {
+                if(singleChar != '\0')
+                    subInputBuffer[charIndex++] = singleChar;
+                else
+                    break;
+                singleChar = byteBuffer.get();
+            }
+            subInputss[index] = new String(subInputBuffer, 0, charIndex, Charset.forName("UTF-8"));
+            //subInputs[index] = byteBuffer.getShort();
         }
+
         byte[] urlBuffer = new byte[512];
         byte singleChar;
         int charIndex = 0;
