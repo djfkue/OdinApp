@@ -12,7 +12,11 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.argonmobile.odinapp.R;
+import com.argonmobile.odinapp.model.CameraInfo;
+import com.argonmobile.odinapp.model.EditProfileModel;
 import com.argonmobile.odinapp.view.CheckedFrameLayout;
+
+import java.util.ArrayList;
 
 public class ImageAdapter extends BaseAdapter {
     private final LayoutInflater mInflater;
@@ -79,8 +83,18 @@ public class ImageAdapter extends BaseAdapter {
         //final float scale = mContext.getResources().getDisplayMetrics().density;
         //convertView.setLayoutParams(new GridView.LayoutParams((int)(220 * scale), (int)(135 * scale)));
 
+        boolean shouldBeChecked = false;
+        ArrayList<CameraInfo> cameraInfos = EditProfileModel.getInstance().getCameraInfoArrayList();
+
+        for (CameraInfo cameraInfo : cameraInfos) {
+            if (cameraInfo.getId() == position) {
+                shouldBeChecked = true;
+                break;
+            }
+        }
+
         CheckedFrameLayout checkedLayout = (CheckedFrameLayout) convertView.findViewById(R.id.checked_frame);
-        checkedLayout.setChecked(isItemChecked(position));
+        checkedLayout.setChecked(isItemChecked(position) || shouldBeChecked);
 
         ImageView imageView = (ImageView) convertView.findViewById(R.id.camera_view);
 

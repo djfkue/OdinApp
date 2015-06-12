@@ -31,7 +31,7 @@ public class CreateWindowRequest extends Request {
 
     @Override
     public short getPayloadLength() {
-        if(subInputs == null || url == null || recycleIndexes == null) {
+        if(subInputss == null || url == null || recycleIndexes == null) {
             throw new IllegalStateException("Request should be init first!");
         }
         //return (short)(30 + (subInputs.length + recycleIndexes.length) * 2 + url.getBytes().length + 1);

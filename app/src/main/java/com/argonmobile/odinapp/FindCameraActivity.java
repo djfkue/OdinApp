@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 
 import com.argonmobile.odinapp.model.EditProfileModel;
 import com.argonmobile.odinapp.view.ScaleTransformView;
@@ -26,6 +29,7 @@ public class FindCameraActivity extends ActionBarActivity {
     private ViewPager mViewPager;
     private FindCameraPageAdapter mFindCameraPageAdapter;
 
+    private PopupMenu mPopupMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +89,31 @@ public class FindCameraActivity extends ActionBarActivity {
         mFindCameraPageAdapter = new FindCameraPageAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mFindCameraPageAdapter);
         mViewPager.setCurrentItem(1);
+
+        ImageButton popupButton = (ImageButton) findViewById(R.id.popup_button);
+        popupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPopupMenu.show();
+            }
+        });
+
+        mPopupMenu = new PopupMenu(this, popupButton);
+        mPopupMenu.inflate(R.menu.menu_find_camera);
+
+        mPopupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                Intent intent = new Intent(FindCameraActivity.this, EditProfileActivity.class);
+                startActivity(intent);
+
+                // Override transitions: we don't want the normal window animation in addition
+                // to our custom one
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
+            }
+        });
 
     }
 

@@ -171,13 +171,13 @@ public class ViewProfileFragment extends Fragment {
 
                 mEditProfileLayoutView.addView(child, layoutParams);
 
-                child.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(getActivity(), ControlInputActivity.class);
-                        startActivity(intent);
-                    }
-                });
+//                child.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Intent intent = new Intent(getActivity(), ControlInputActivity.class);
+//                        startActivity(intent);
+//                    }
+//                });
 
                 imageUpdater.subscribe(windowInfo.inputIndex, imageView);
                 ConnectionManager.defaultManager.startJpgTransport(imageUpdater,

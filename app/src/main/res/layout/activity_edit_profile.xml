@@ -12,4 +12,10 @@
         android:layout_height="match_parent"
         android:background="#111320"/>
 
+    <ImageButton
+        android:id="@+id/popup_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentRight="true"
+        android:src="@android:drawable/ic_menu_more"/>
 </com.argonmobile.odinapp.view.ScaleTransformView>

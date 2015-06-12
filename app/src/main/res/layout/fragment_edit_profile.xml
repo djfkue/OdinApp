@@ -5,17 +5,24 @@
     android:orientation="vertical"
     tools:context="com.argonmobile.odinapp.EditProfileFragment">
 
-    <TextView
-        android:id="@+id/title_view"
+    <RelativeLayout
+        android:id="@+id/title_view_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:gravity="center"
-        android:text="@string/edit_profile_title"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        />
-
+        android:layout_height="50dp"
+        android:background="@drawable/s_bg">
+        <TextView
+            android:id="@+id/title_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="6dp"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:text="@string/edit_profile_title"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textColor="#000"
+            />
+    </RelativeLayout>
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
@@ -23,7 +30,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="8dp"
-        android:layout_below="@+id/title_view"
+        android:layout_below="@+id/title_view_container"
         android:background="@android:color/white"/>
     <HorizontalScrollView
         android:id="@+id/ScrollView01"

@@ -31,6 +31,7 @@ import com.argonmobile.odinapp.protocol.connection.ControlConnection;
 import com.argonmobile.odinapp.protocol.deviceinfo.InputInfo;
 import com.argonmobile.odinapp.protocol.deviceinfo.WindowInfo;
 import com.argonmobile.odinapp.protocol.image.ImageUpdater;
+import com.argonmobile.odinapp.util.MockSwitch;
 import com.argonmobile.odinapp.view.CheckedFrameLayout;
 
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class FindCameraGridFragment extends Fragment {
 
     private static final String TAG = "FindCameraGridFragment";
     private static final int MSG_ON_GET_INPUT_INFO_LIST = 0x01;
-    private static final boolean DEBUG_MOCK = false;
+    private static final boolean DEBUG_MOCK = true;
 
     private ArrayList<InputInfo> mInputInfos = new ArrayList<>();
 
@@ -85,7 +86,7 @@ public class FindCameraGridFragment extends Fragment {
     @Override
     public void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!DEBUG_MOCK) {
+        if (!MockSwitch.MOCK_SWITCH_ON) {
             ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
             con.addCommandListener(commandListener);
             { // test get input info
@@ -104,7 +105,7 @@ public class FindCameraGridFragment extends Fragment {
 
         mInputAdapter = new InputAdapter(rootView.getContext());
 
-        if (DEBUG_MOCK) {
+        if (MockSwitch.MOCK_SWITCH_ON) {
             mImageAdapter = new ImageAdapter(rootView.getContext());
             gridview.setAdapter(mImageAdapter);
         } else {
@@ -113,20 +114,18 @@ public class FindCameraGridFragment extends Fragment {
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (DEBUG_MOCK) {
+                if (MockSwitch.MOCK_SWITCH_ON) {
                     mImageAdapter.toggleItemChecked(position);
                     if (mImageAdapter.isItemChecked(position)) {
-                        if (mInputAdapter.isItemChecked(position)) {
                             CameraInfo cameraInfo = new CameraInfo(view.getTop(),
                                     view.getLeft(),
                                     view.getWidth(),
                                     view.getHeight(),
-                                    mInputInfos.get(position).inputIndex,
+                                    position,
                                     R.drawable.sample_0);
                             EditProfileModel.getInstance().addCameraInfo(cameraInfo);
-                        } else {
-                            EditProfileModel.getInstance().removeCameraInfo(position);
-                        }
+                    } else {
+                        EditProfileModel.getInstance().removeCameraInfo(position);
                     }
                 } else {
                     mInputAdapter.toggleItemChecked(position);
@@ -168,7 +167,7 @@ public class FindCameraGridFragment extends Fragment {
     @Override
     public void onStop () {
         super.onStop();
-        if (!DEBUG_MOCK) {
+        if (!MockSwitch.MOCK_SWITCH_ON) {
             for (InputInfo inputInfo : mInputInfos) {
                 ConnectionManager.defaultManager.stopJpgTransport(new byte[]{(byte) inputInfo.inputIndex});
             }
@@ -291,6 +290,7 @@ public class FindCameraGridFragment extends Fragment {
             imageUpdater.subscribe(mInputInfos.get(position).inputIndex, imageView);
             ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
                     (short)240, (short)180, new byte[]{(byte) mInputInfos.get(position).inputIndex});
+
             return convertView;
         }
     }

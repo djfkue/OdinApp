@@ -8,11 +8,13 @@ import android.os.Environment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 
 import com.argonmobile.odinapp.view.ScaleTransformView;
 
@@ -36,6 +38,8 @@ public class EditProfileActivity extends ActionBarActivity {
     private ViewPager mViewPager;
     private EditProfilePageAdapter mEditProfilePageAdapter;
     private File pictureFile;
+
+    private PopupMenu mPopupMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,10 +86,15 @@ public class EditProfileActivity extends ActionBarActivity {
                     intent.putExtra(TempChosenProfileActivity.MODE_ENABLE_SELECT, true);
                     intent.putExtra("TEST_BITMAP", pictureFile.getAbsolutePath());
                     startActivity(intent);
-                } else if (mScaleFactor > 1.1f){
+                } else if (mScaleFactor > 1.1f) {
                     Intent intent = new Intent(EditProfileActivity.this, FindCameraActivity.class);
                     startActivity(intent);
                 } else if (mScaleFactor < 0.7f) {
+                    if (sNeedRelayout) {
+                        EditProfileFragment editProfileFragment = (EditProfileFragment) mEditProfilePageAdapter.getRegisteredFragment(1);
+                        editProfileFragment.closeAllWindow();
+                        editProfileFragment.addWindows();
+                    }
                     Intent intent = new Intent(EditProfileActivity.this, TempChosenProfileActivity.class);
                     View view = mEditProfilePageAdapter.getRegisteredFragment(mViewPager.getCurrentItem()).getView();
                     view.setDrawingCacheBackgroundColor(Color.BLACK);
@@ -105,6 +114,35 @@ public class EditProfileActivity extends ActionBarActivity {
         mEditProfilePageAdapter = new EditProfilePageAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mEditProfilePageAdapter);
         mViewPager.setCurrentItem(1);
+
+
+        ImageButton popupButton = (ImageButton) findViewById(R.id.popup_button);
+        popupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPopupMenu.show();
+            }
+        });
+
+        mPopupMenu = new PopupMenu(this, popupButton);
+        mPopupMenu.inflate(R.menu.menu_edit_profile);
+
+        mPopupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if (menuItem.getItemId() == R.id.action_find_camera) {
+                    Intent intent = new Intent(EditProfileActivity.this, FindCameraActivity.class);
+                    startActivity(intent);
+                }
+
+                if (menuItem.getItemId() == R.id.action_view_profile) {
+                    Intent intent = new Intent(EditProfileActivity.this, ChosenProfileActivity.class);
+                    startActivity(intent);
+                }
+
+                return true;
+            }
+        });
     }
 
     private void storeImage(Bitmap image) {

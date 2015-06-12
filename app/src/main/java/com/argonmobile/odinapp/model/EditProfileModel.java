@@ -1,5 +1,7 @@
 package com.argonmobile.odinapp.model;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -28,6 +30,7 @@ public class EditProfileModel {
     }
 
     public void addCameraInfo(CameraInfo cameraInfo) {
+        Log.e("TALOS", "addCameraInfo............");
         mCameraInfoArrayList.add(cameraInfo);
     }
 
