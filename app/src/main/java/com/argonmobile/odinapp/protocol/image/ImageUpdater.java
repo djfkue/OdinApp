@@ -22,7 +22,7 @@ public class ImageUpdater {
         public boolean handleMessage(Message msg) {
             if(msg.what == ImageProcessor.MSG_ON_REC_IMAGE) {
                 // on received image from
-                updateImage(msg.arg1, (Bitmap)msg.obj);
+                updateImage(msg.arg1, msg.arg2, (Bitmap)msg.obj);
             }
             return true;
         }
@@ -37,18 +37,20 @@ public class ImageUpdater {
         imageViewMap = new SparseArray<ArrayList<SoftReference<ImageView>>>();
     }
 
-    public void subscribe(int planOrSignalIndex, ImageView imageView) {
+    public void subscribe(int imageType, int planOrSignalIndex, ImageView imageView) {
+        int key = getKey(imageType, planOrSignalIndex);
         synchronized (imageViewMap) {
-            ArrayList<SoftReference<ImageView>> imageViews = imageViewMap.get(planOrSignalIndex);
+            ArrayList<SoftReference<ImageView>> imageViews = imageViewMap.get(key);
             if(imageViews == null) imageViews = new ArrayList<SoftReference<ImageView>>();
             imageViews.add(new SoftReference<ImageView>(imageView));
-            imageViewMap.put(planOrSignalIndex, imageViews);
+            imageViewMap.put(key, imageViews);
         }
     }
 
-    public void unsubscribe(int planOrSignalIndex, ImageView imageView) {
+    public void unsubscribe(int imageType, int planOrSignalIndex, ImageView imageView) {
+        int key = getKey(imageType, planOrSignalIndex);
         synchronized (imageViewMap) {
-            ArrayList<SoftReference<ImageView>> imageViews = imageViewMap.get(planOrSignalIndex);
+            ArrayList<SoftReference<ImageView>> imageViews = imageViewMap.get(key);
             if(imageViews == null) return;
             for(SoftReference<ImageView> srImageView : imageViews) {
                 if(srImageView.get() != null && srImageView.get() == imageView) {
@@ -57,17 +59,18 @@ public class ImageUpdater {
                 }
             }
             if(imageViews.size() == 0) {
-                imageViewMap.remove(planOrSignalIndex);
+                imageViewMap.remove(key);
             }
         }
     }
 
-    private void updateImage(int planOrSignalIndex, Bitmap bitmap) {
+    private void updateImage(int imageType, int planOrSignalIndex, Bitmap bitmap) {
         ArrayList<SoftReference<ImageView>> imageViews = null;
+        int key = getKey(imageType, planOrSignalIndex);
         synchronized (imageViewMap) {
-            imageViews = imageViewMap.get(planOrSignalIndex);
+            imageViews = imageViewMap.get(key);
             if(imageViews == null || imageViews.size() == 0) {
-                imageViewMap.remove(planOrSignalIndex);
+                imageViewMap.remove(key);
                 //imageViewMap.removeAt(planOrSignalIndex);
                 bitmap.recycle();
             } else {
@@ -79,11 +82,15 @@ public class ImageUpdater {
                     }
                 }
                 if(!usingImage) {
-                    imageViewMap.remove(planOrSignalIndex);
+                    imageViewMap.remove(key);
                     bitmap.recycle();
                 }
             }
         }
 
+    }
+
+    private int getKey(int imageType, int planOrSignalIndex) {
+        return ((imageType & 0x000000FF) << 16) + planOrSignalIndex;
     }
 }

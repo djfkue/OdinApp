@@ -51,7 +51,7 @@ public class ImageProcessor extends IState implements CommandListener {
             options.inPreferredConfig = Bitmap.Config.RGB_565;
             Bitmap bitmap = BitmapFactory.decodeByteArray(packet.imageData, 0, packet.imageData.length, options);
             Log.i(TAG, "after decode bitmap, cost:" + (System.currentTimeMillis() - start) + "ms");
-            handler.sendMessage(handler.obtainMessage(MSG_ON_REC_IMAGE, packet.imageOrPlanIndex, 0, bitmap));
+            handler.sendMessage(handler.obtainMessage(MSG_ON_REC_IMAGE, packet.imageType, packet.imageOrPlanIndex, bitmap));
         }
     }
 
