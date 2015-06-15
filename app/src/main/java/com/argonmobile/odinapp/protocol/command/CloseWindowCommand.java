@@ -7,13 +7,17 @@ import java.nio.ByteBuffer;
  */
 public class CloseWindowCommand extends Response {
     public short windowId;
+    public boolean closeAllWindow;
 
-    public CloseWindowCommand() {
-        this.command = CommandDefs.CMD_CLOSE_WINDOW;
-    }
     public CloseWindowCommand(short windowId) {
         this.command = CommandDefs.CMD_CLOSE_WINDOW;
         this.windowId = windowId;
+        closeAllWindow = false;
+    }
+
+    public CloseWindowCommand() {
+        this.command = CommandDefs.CMD_CLOSE_WINDOW;
+        this.closeAllWindow = true;
     }
 
     public static Creator sCreator = new Creator() {
@@ -30,7 +34,12 @@ public class CloseWindowCommand extends Response {
 
     @Override
     public void fillPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(windowId);
+        if(closeAllWindow) {
+            byteBuffer.put((byte)0xFF);
+            byteBuffer.put((byte)0xFF);
+        } else {
+            byteBuffer.putShort(windowId);
+        }
     }
 
     @Override

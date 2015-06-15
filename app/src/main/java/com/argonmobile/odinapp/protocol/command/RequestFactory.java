@@ -53,6 +53,10 @@ public class RequestFactory {
         return new CloseWindowCommand(windowId);
     }
 
+    public static Command createCloseAllWindowRequest() {
+        return new CloseWindowCommand();
+    }
+
     public static Command createPowerControlCommand(boolean powerOn, byte devId) {
         return new PowerControlCommand(powerOn, devId);
     }
