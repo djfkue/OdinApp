@@ -47,7 +47,7 @@ public class ScaleTransformView extends RelativeLayout {
         // Sets up interactions
         Log.e(TAG, "init scale gesture detector");
         mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
-        mScaleGestureDetector.setQuickScaleEnabled(true);
+        //mScaleGestureDetector.setQuickScaleEnabled(true);
     }
 
     public ScaleTransformView(Context context, AttributeSet attrs, int defStyle) {

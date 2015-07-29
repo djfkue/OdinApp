@@ -36,7 +36,7 @@ public class FreeProfileLayoutView extends RelativeLayout {
     public FreeProfileLayoutView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
-        mScaleGestureDetector.setQuickScaleEnabled(true);
+        //mScaleGestureDetector.setQuickScaleEnabled(true);
         mRectPaint = new Paint();
         mRectPaint.setStyle(Paint.Style.STROKE);
         mRectPaint.setColor(Color.LTGRAY);
@@ -52,7 +52,7 @@ public class FreeProfileLayoutView extends RelativeLayout {
     public FreeProfileLayoutView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
-        mScaleGestureDetector.setQuickScaleEnabled(true);
+        //mScaleGestureDetector.setQuickScaleEnabled(true);
     }
 
     public void setVScreenCount(int vScreens) {

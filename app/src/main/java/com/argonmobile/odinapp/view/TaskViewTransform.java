@@ -1,6 +1,8 @@
 package com.argonmobile.odinapp.view;
 import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.graphics.Rect;
+import android.os.Build;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
@@ -59,6 +61,7 @@ public class TaskViewTransform {
     }
 
     /** Applies this transform to a view. */
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public void applyToTaskView(View v, int duration, Interpolator interp, boolean allowLayers,
                                 boolean allowShadows, ValueAnimator.AnimatorUpdateListener updateCallback) {
         // Check to see if any properties have changed, and update the task view
@@ -84,11 +87,11 @@ public class TaskViewTransform {
             if (requiresLayers && allowLayers) {
                 anim.withLayer();
             }
-            if (updateCallback != null) {
-                anim.setUpdateListener(updateCallback);
-            } else {
-                anim.setUpdateListener(null);
-            }
+//            if (updateCallback != null) {
+//                anim.setUpdateListener(updateCallback);
+//            } else {
+//                anim.setUpdateListener(null);
+//            }
             anim.setStartDelay(startDelay)
                     .setDuration(duration)
                     .setInterpolator(interp)

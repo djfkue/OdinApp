@@ -321,7 +321,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener {
                     animate().alpha(1f)
                             .translationY(transform.translationY)
                             .setStartDelay(mConfig.taskBarEnterAnimDelay)
-                            .setUpdateListener(null)
+                            //.setUpdateListener(null)
                             .setInterpolator(mConfig.fastOutSlowInInterpolator)
                             .setDuration(mConfig.taskViewEnterFromHomeDuration)
                             .withEndAction(new Runnable() {
@@ -347,7 +347,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener {
             animate()
                     .translationY(transform.translationY)
                     .setStartDelay(delay)
-                    .setUpdateListener(ctx.updateListener)
+                    //.setUpdateListener(ctx.updateListener)
                     .setInterpolator(mConfig.quintOutInterpolator)
                     .setDuration(mConfig.taskViewEnterFromHomeDuration +
                             frontIndex * mConfig.taskViewEnterFromHomeStaggerDelay)
@@ -423,7 +423,7 @@ public class TaskView extends FrameLayout implements View.OnClickListener {
         animate()
                 .translationY(ctx.offscreenTranslationY)
                 .setStartDelay(0)
-                .setUpdateListener(null)
+                //.setUpdateListener(null)
                 .setInterpolator(mConfig.fastOutLinearInInterpolator)
                 .setDuration(mConfig.taskViewExitToHomeDuration)
                 .withEndAction(ctx.postAnimationTrigger.decrementAsRunnable())

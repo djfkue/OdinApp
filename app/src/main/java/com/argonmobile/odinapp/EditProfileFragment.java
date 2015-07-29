@@ -28,10 +28,12 @@ import android.widget.TextView;
 
 import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
+import com.argonmobile.odinapp.model.PlanInfoModel;
 import com.argonmobile.odinapp.model.ScreenStructure;
 import com.argonmobile.odinapp.model.WindowInfoModel;
 import com.argonmobile.odinapp.protocol.command.CloseWindowCommand;
 import com.argonmobile.odinapp.protocol.command.Command;
+import com.argonmobile.odinapp.protocol.command.CommandDefs;
 import com.argonmobile.odinapp.protocol.command.CreateWindowCommand;
 import com.argonmobile.odinapp.protocol.command.CreateWindowRequest;
 import com.argonmobile.odinapp.protocol.command.GetPlanWindowListResponse;
@@ -98,7 +100,9 @@ public class EditProfileFragment extends Fragment {
                     mWindowInfos.add(windowInfo);
                 }
 
-                //updateWindowInfos();
+//                if (!EditProfileActivity.sNeedRelayout) {
+//                    updateWindowInfos();
+//                }
 
             }
             return true;
@@ -196,11 +200,11 @@ public class EditProfileFragment extends Fragment {
                     }
                 });
 
-                imageUpdater.subscribe(windowInfo.inputIndex, imageView);
+                imageUpdater.subscribe(CommandDefs.PARAM_SIGNAL_IMAGE, windowInfo.inputIndex, imageView);
                 ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
                         (short) 480, (short) 270, new byte[]{(byte) windowInfo.inputIndex});
 
-                child.setTag(windowInfo);
+                //child.setTag(windowInfo);
 
 //
 //                imageUpdater.subscribe(0, imageView);
@@ -253,13 +257,13 @@ public class EditProfileFragment extends Fragment {
 //                }
 //            }
 
-            if (cmd instanceof CreateWindowCommand || cmd instanceof CloseWindowCommand) {
-                ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
-                {
-                    Request req = RequestFactory.createGetPlanWindowListRequest();
-                    con.sendCommand(req);
-                }
-            }
+//            if (cmd instanceof CreateWindowCommand || cmd instanceof CloseWindowCommand) {
+//                ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+//                {
+//                    Request req = RequestFactory.createGetPlanWindowListRequest();
+//                    con.sendCommand(req);
+//                }
+//            }
         }
     };
 
@@ -274,7 +278,7 @@ public class EditProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
         mEditProfileLayoutView = (FreeProfileLayoutView) rootView.findViewById(R.id.edit_container);
 
@@ -284,11 +288,11 @@ public class EditProfileFragment extends Fragment {
         mEditProfileLayoutView.enableGesture(true);
 
         if (savedInstanceState == null) {
-            mEditProfileLayoutView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            rootView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
 
-                    mEditProfileLayoutView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    rootView.getViewTreeObserver().removeOnPreDrawListener(this);
 
                     runEnterAnimation();
 
@@ -364,13 +368,16 @@ public class EditProfileFragment extends Fragment {
     public void closeAllWindow() {
         ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
         {
-            List<WindowInfo> windowInfos = WindowInfoModel.getInstance().windowInfos;
+            List<WindowInfo> windowInfos = new ArrayList<WindowInfo>();
+            windowInfos.addAll(WindowInfoModel.getInstance().windowInfos);
             for (WindowInfo windowInfo : windowInfos) {
                 Log.e("TD_TRACE", "send close window request");
                 Command req = RequestFactory.createCloseWindowRequest(windowInfo.windowId);
                 con.sendCommand(req);
             }
         }
+//        Command req = RequestFactory.createCloseAllWindowRequest();
+//        con.sendCommand(req);
     }
 
     @Override
@@ -388,7 +395,7 @@ public class EditProfileFragment extends Fragment {
     private void runEnterAnimation() {
         final long duration = (long) (ANIM_DURATION);
 
-        mTextView.setAlpha(0);
+        //mTextView.setAlpha(0);
 
         // Fade in the black background
         ObjectAnimator bgAnim = ObjectAnimator.ofInt(mBackground, "alpha", 0, 255);
@@ -412,7 +419,9 @@ public class EditProfileFragment extends Fragment {
                                 performUpdateProfileModel();
                                 //addWindows();
                             }
-                            createEditProfileLayout();
+                            //else {
+                                createEditProfileLayout();
+                            //}
                             ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
                             {
                                 Request req = RequestFactory.createGetPlanWindowListRequest();
@@ -472,9 +481,9 @@ public class EditProfileFragment extends Fragment {
                 req.top = (short) cameraInfo.mTop;
                 req.width = (short) cameraInfo.mWidth;
                 req.height = (short) cameraInfo.mHeight;
-                req.leftTop = (short) ((cameraInfo.mTop / (mCellHeight * 2) + 1) * 16 + ((cameraInfo.mLeft - 5) / (mCellWidth * 2) + 1));
+                req.leftTop = (short) (((cameraInfo.mTop - 5) / (mCellHeight * 2) + 1) * 16 + ((cameraInfo.mLeft - 5) / (mCellWidth * 2) + 1));
                 Log.e("TD_TRACE", "leftTop: " + req.leftTop);
-                req.rightBottom = (short) (((cameraInfo.mTop + cameraInfo.mHeight) / (mCellHeight * 2) + 1) * 16 + ((cameraInfo.mLeft + cameraInfo.mWidth - 5) / (mCellWidth * 2) + 1));;
+                req.rightBottom = (short) (((cameraInfo.mTop + cameraInfo.mHeight - 5) / (mCellHeight * 2) + 1) * 16 + ((cameraInfo.mLeft + cameraInfo.mWidth - 5) / (mCellWidth * 2) + 1));;
                 Log.e("TD_TRACE", "rightBottom: " + req.rightBottom);
 
                 req.left = (short) ScaleFactorCaculator.getScreenWindowLeft(cameraInfo.mLeft, mEditProfileLayoutView.getWidth(), mEditProfileLayoutView.getHeight());
@@ -528,11 +537,17 @@ public class EditProfileFragment extends Fragment {
 
         mEditProfileLayoutView.removeAllViews();
         Log.e(TAG, "create edit profile layout: " + cameraInfos.size());
+        if (getActivity() == null ) {
+            return;
+        }
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         for (int i = 0; i < cameraInfos.size(); i++) {
             //View cameraView = mGridView.getChildAt(i);
             CameraInfo cameraInfo = cameraInfos.get(i);
             View child = inflater.inflate(R.layout.camera_grid_item, mEditProfileLayoutView, false);
+
+            Log.e("TALOS", "createEditProfileLayout width: " + cameraInfo.getWidth());
+            Log.e("TALOS", "createEditProfileLayout height:" + cameraInfo.getHeight());
 
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(cameraInfo.getWidth(), cameraInfo.getHeight());
             layoutParams.leftMargin = cameraInfo.getLeft();
@@ -548,7 +563,7 @@ public class EditProfileFragment extends Fragment {
             mEditProfileLayoutView.addView(child, layoutParams);
 
             if (!MockSwitch.MOCK_SWITCH_ON) {
-                imageUpdater.subscribe(cameraInfo.getId(), imageView);
+                imageUpdater.subscribe(CommandDefs.PARAM_SIGNAL_IMAGE, cameraInfo.getId(), imageView);
                 ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
                         (short) 480, (short) 270, new byte[]{(byte) cameraInfo.getId()});
             }
@@ -619,20 +634,39 @@ public class EditProfileFragment extends Fragment {
                     Log.e(TAG, "ACTION_DRAG_ENTERED................. y: " + mStartY);
 
                     break;
-                case DragEvent.ACTION_DRAG_EXITED:
+                case DragEvent.ACTION_DRAG_EXITED: {
                     Log.e(TAG, "ACTION_DRAG_EXITED ");
+                    View view = (View) event.getLocalState();
+                    view.bringToFront();
+                    view.setVisibility(View.VISIBLE);
 
+                    syncInputWindow(view, view.getWidth(), view.getHeight());
                     break;
+                }
                 case DragEvent.ACTION_DROP:
                     if (v.getId() == R.id.edit_container) {
                         View view = (View) event.getLocalState();
                         Log.e(TAG, "ACTION_DROP................. x: " + event.getX());
                         Log.e(TAG, "ACTION_DROP................. y: " + event.getY());
-                        view.setX(event.getX() - view.getWidth() / 2);
-                        view.setY(event.getY() - view.getHeight() / 2);
+
+                        //mEditProfileLayoutView.getParent().requestDisallowInterceptTouchEvent(false);
+
+                        if ((event.getX() - view.getWidth() / 2 + view.getMeasuredWidth()) > (mEditProfileLayoutView.getX() + mEditProfileLayoutView.getMeasuredWidth())) {
+                            view.setX(mEditProfileLayoutView.getX() + mEditProfileLayoutView.getMeasuredWidth() - view.getMeasuredWidth());
+                        } else if ((event.getY() - view.getHeight() / 2 + view.getMeasuredHeight() > (mEditProfileLayoutView.getY() + mEditProfileLayoutView.getMeasuredHeight()))) {
+                            view.setY(mEditProfileLayoutView.getY() + mEditProfileLayoutView.getMeasuredHeight() - view.getMeasuredHeight());
+                        } else if ((event.getX() - view.getWidth() / 2 + view.getMeasuredWidth()) < (mEditProfileLayoutView.getX() + view.getMeasuredWidth())) {
+                            view.setX(mEditProfileLayoutView.getX());
+                        } else if ((event.getY() - view.getHeight() / 2 + view.getMeasuredHeight() < (mEditProfileLayoutView.getY() + view.getMeasuredHeight()))) {
+                            view.setY(mEditProfileLayoutView.getY());
+                        }
+                        else {
+                            view.setX(event.getX() - view.getWidth() / 2);
+                            view.setY(event.getY() - view.getHeight() / 2);
+                        }
+
                         view.bringToFront();
                         view.setVisibility(View.VISIBLE);
-                        //mEditProfileLayoutView.getParent().requestDisallowInterceptTouchEvent(false);
                         syncInputWindow(view, view.getWidth(), view.getHeight());
                     }
 
@@ -788,6 +822,14 @@ public class EditProfileFragment extends Fragment {
             return true;
         }
     };
+
+    public void saveProfile() {
+        if (EditProfileActivity.sNeedRelayout) {
+            ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+            Request newPlan = RequestFactory.createNewPlanRequest(PlanInfoModel.getInstance().planInfos.size() + 1, "New Plan");
+            con.sendCommand(newPlan);
+        }
+    }
 
     private class ScaleListener
             extends ScaleGestureDetector.SimpleOnScaleGestureListener {

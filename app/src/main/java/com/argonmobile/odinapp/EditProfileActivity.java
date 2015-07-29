@@ -90,11 +90,12 @@ public class EditProfileActivity extends ActionBarActivity {
                     Intent intent = new Intent(EditProfileActivity.this, FindCameraActivity.class);
                     startActivity(intent);
                 } else if (mScaleFactor < 0.7f) {
-                    if (sNeedRelayout) {
-                        EditProfileFragment editProfileFragment = (EditProfileFragment) mEditProfilePageAdapter.getRegisteredFragment(1);
-                        editProfileFragment.closeAllWindow();
-                        editProfileFragment.addWindows();
-                    }
+                    //if (sNeedRelayout) {
+                    EditProfileFragment editProfileFragment = (EditProfileFragment) mEditProfilePageAdapter.getRegisteredFragment(1);
+                    editProfileFragment.closeAllWindow();
+                    editProfileFragment.addWindows();
+                    editProfileFragment.saveProfile();
+                    //}
                     Intent intent = new Intent(EditProfileActivity.this, TempChosenProfileActivity.class);
                     View view = mEditProfilePageAdapter.getRegisteredFragment(mViewPager.getCurrentItem()).getView();
                     view.setDrawingCacheBackgroundColor(Color.BLACK);

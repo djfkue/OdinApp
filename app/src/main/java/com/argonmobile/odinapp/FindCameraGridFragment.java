@@ -22,6 +22,7 @@ import com.argonmobile.odinapp.model.CameraInfo;
 import com.argonmobile.odinapp.model.EditProfileModel;
 import com.argonmobile.odinapp.model.WindowInfoModel;
 import com.argonmobile.odinapp.protocol.command.Command;
+import com.argonmobile.odinapp.protocol.command.CommandDefs;
 import com.argonmobile.odinapp.protocol.command.GetInputInfoResponse;
 import com.argonmobile.odinapp.protocol.command.Request;
 import com.argonmobile.odinapp.protocol.command.RequestFactory;
@@ -287,7 +288,7 @@ public class FindCameraGridFragment extends Fragment {
 
             ImageView imageView = (ImageView) convertView.findViewById(R.id.camera_view);
             //imageView.setImageResource(R.drawable.sample_0);
-            imageUpdater.subscribe(mInputInfos.get(position).inputIndex, imageView);
+            imageUpdater.subscribe(CommandDefs.PARAM_SIGNAL_IMAGE, mInputInfos.get(position).inputIndex, imageView);
             ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
                     (short)240, (short)180, new byte[]{(byte) mInputInfos.get(position).inputIndex});
 

@@ -24,6 +24,7 @@ import com.argonmobile.odinapp.protocol.connection.CommandListener;
 import com.argonmobile.odinapp.protocol.connection.ConnectionManager;
 import com.argonmobile.odinapp.protocol.connection.ControlConnection;
 import com.argonmobile.odinapp.protocol.deviceinfo.PlanInfo;
+import com.argonmobile.odinapp.util.MockSwitch;
 import com.argonmobile.odinapp.util.ReferenceCountedTrigger;
 import com.argonmobile.odinapp.view.RecentsView;
 import com.argonmobile.odinapp.view.TaskView;
@@ -146,11 +147,13 @@ public class RecentProfileFragment extends Fragment {
             }
         });
 
-        ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
-        con.addCommandListener(commandListener);
-        {
-            Request req = RequestFactory.createGetPlanListRequest();
-            con.sendCommand(req);
+        if (!MockSwitch.MOCK_SWITCH_ON) {
+            ControlConnection con = ConnectionManager.defaultManager.getControlConnection();
+            con.addCommandListener(commandListener);
+            {
+                Request req = RequestFactory.createGetPlanListRequest();
+                con.sendCommand(req);
+            }
         }
 
         //updateRecentTasks();

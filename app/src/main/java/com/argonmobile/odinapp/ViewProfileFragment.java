@@ -166,6 +166,9 @@ public class ViewProfileFragment extends Fragment {
                 layoutParams.width = deviceWindowWidth;
                 layoutParams.height = deviceWindowHeight;
 
+                Log.e("TALOS", "updateWindowInfo: " + deviceWindowWidth);
+                Log.e("TALOS", "updateWindowInfo: " + deviceWindowHeight);
+
                 ImageView imageView = (ImageView) child.findViewById(R.id.camera_view);
                 imageView.setImageResource(R.drawable.sample_0);
 
@@ -179,7 +182,7 @@ public class ViewProfileFragment extends Fragment {
 //                    }
 //                });
 
-                imageUpdater.subscribe(windowInfo.inputIndex, imageView);
+                imageUpdater.subscribe(CommandDefs.PARAM_SIGNAL_IMAGE, windowInfo.inputIndex, imageView);
                 ConnectionManager.defaultManager.startJpgTransport(imageUpdater,
                         (short) 480, (short) 270, new byte[]{(byte) windowInfo.inputIndex});
 
@@ -314,7 +317,7 @@ public class ViewProfileFragment extends Fragment {
                         int height = mEditProfileLayoutView.getMeasuredHeight();
                         int width = (int) (height * ( screenWidth / screenHeight ));
 
-                        Log.e(TAG, "editProfileLayoutWidth: " + width);
+                        Log.e(TAG, "editProfileLayoutHeight: " + height);
                         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mEditProfileLayoutView.getLayoutParams();
 
                         layoutParams.width = width;
